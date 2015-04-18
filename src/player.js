@@ -128,11 +128,9 @@ Player.prototype = {
 		self.playlist.innerHTML = data.join('');
 		self.current = -1;
 		self.duration = 0;
-		self.play(0);
 	},
 	play: function(i) {
 		var self = this;
-		var image = null;
 		if(i >= 0 && i < self.songs.length) {
 			if(self.current == i) {
 				self.audio.currentTime = 0;
@@ -146,15 +144,14 @@ Player.prototype = {
 				self.title.innerHTML = self.safeHTML(song.name);
 				self.audio.src = song.url;
 				self.duration = song.duration ? song.duration / 1000 : null;
-				image = song.image;
+				var image = song.image || self.options.image;
+				if(image)
+					self.image.innerHTML = '<img src="' + self.safeHTML(image) + '">';
 			}
 			self.prtime.innerHTML = '';
 			self.prcur.style.left = 0;
 			self.audio.play();
 		}
-		if(!image) image = self.options.image;
-		if(image)
-			self.image.innerHTML = '<img src="' + self.safeHTML(image) + '">';
 	},
 	previous: function() {
 		return (this.current - 1) % this.songs.length;
