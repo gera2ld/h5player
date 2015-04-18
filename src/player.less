@@ -1,0 +1,112 @@
+@-webkit-keyframes ge-roll {
+	from {
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	to {
+		-webkit-transform: rotate(360deg);
+		transform: rotate(360deg);
+	}
+}
+@keyframes ge-roll {
+	from {
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	to {
+		-webkit-transform: rotate(360deg);
+		transform: rotate(360deg);
+	}
+}
+.ge-player{
+	background: #fff;
+	border: 1px solid;
+	position: relative;
+	max-width: 400px;
+	.fa {
+		cursor: pointer;
+		&:hover,&.active {
+			color: dodgerblue;
+		}
+	}
+	.image {
+		position: absolute;
+		width: 130px;
+		height: 130px;
+		left: 10px;
+		top: 10px;
+		&.ge-roll {
+			-webkit-animation: ge-roll 5s linear infinite;
+			animation: ge-roll 5s linear infinite;
+		}
+		img {
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+		}
+	}
+	.buttons {
+		position: absolute;
+		top: 10px;
+		right: 10px;
+	}
+	.control {
+		padding: 30px 10px 10px 150px;
+		height: 150px;
+		text-align: center;
+		.fa {
+			margin: 10px;
+			font-size: 30px;
+		}
+	}
+	.progress{
+		padding: 1em;
+		.wrap {
+			position: relative;
+		}
+		.bar {
+			border: 1px solid gray;
+			height: 1px;
+		}
+		.cursor{
+			cursor: pointer;
+			position: absolute;
+			background: gray;
+			border-radius: 50%;
+			width: 10px;
+			height: 10px;
+			top: -4px;
+			margin-left: -5px;
+			left: 0;
+		}
+		.time{
+			position: absolute;
+			right: 0;
+			top: -2em;
+		}
+	}
+	.playlist{
+		max-height: 200px;
+		border-top: 1px dashed gray;
+		border-radius: .5em;
+		padding: .5em 1em;
+		overflow-y: auto;
+		&.hide {
+			display: none;
+		}
+		&>div{
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			color: #1a1a1a;
+			cursor: pointer;
+			&.active{
+				color: dodgerblue;
+				font-weight: bold;
+			}
+			&:hover{
+				color: orange;
+				font-weight: bold;
+			}
+		}
+	}
+}
