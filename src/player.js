@@ -10,7 +10,7 @@ Player.prototype = {
 		container.innerHTML =
 			'<div class="image"></div>'+
 			'<div class="buttons">'+
-				'<span class="fa fa-list"></span>'+
+				'<span data="list" class="fa fa-list"></span>'+
 			'</div>'+
 			'<div class="control">'+
 				'<div class="title"></div>'+
@@ -32,7 +32,7 @@ Player.prototype = {
 		self.btprev = container.querySelector('*[data=prev]');
 		self.btplay = container.querySelector('*[data=play]');
 		self.btnext = container.querySelector('*[data=next]');
-		self.btplaylist = container.querySelector('.fa-list');
+		self.btplaylist = container.querySelector('*[data=list]');
 		self.playlist = container.querySelector('.playlist');
 		self.prcur = container.querySelector('.cursor');
 		self.prtime = container.querySelector('.time');

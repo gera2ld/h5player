@@ -33,3 +33,5 @@ player.play(0);
 Examples
 ---
 <http://wx.geraldl.net/player/>
+
+![snapshot](snapshots/player.png)
