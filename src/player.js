@@ -82,16 +82,16 @@ Player.prototype = {
 			self.prtime.innerHTML = self.timestr(currentTime) + '/' + self.timestr(duration);
 		}, false);
 		var playStatusChange = function(e) {
-			var cmd = ['add', 'remove'];
-			if(e.type == 'pause') cmd.reverse();
+			var status = ['play', 'pause'];
+			if(e.type == 'pause') status.reverse();
 			var playcls = self.btplay.classList;
-			self.classes['play'].split(/\s+/).forEach(function(c){
-				playcls[cmd[1]](c);
+			self.classes[status[0]].split(/\s+/).forEach(function(c){
+				playcls.remove(c);
 			});
-			self.classes['pause'].split(/\s+/).forEach(function(c){
-				playcls[cmd[0]](c);
+			self.classes[status[1]].split(/\s+/).forEach(function(c){
+				playcls.add(c);
 			});
-			self.image.classList[cmd[0]]('ge-roll');
+			self.image.classList[e.type=='play'?'add':'remove']('ge-roll');
 		};
 		self.audio.addEventListener('play', playStatusChange, false);
 		self.audio.addEventListener('pause', playStatusChange, false);
