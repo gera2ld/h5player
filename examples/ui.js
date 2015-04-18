@@ -3,6 +3,9 @@ var player = new Player({
 	container: document.getElementById('player'),
 	image: 'http://cn.gravatar.com/avatar/a0ad718d86d21262ccd6ff271ece08a3?s=130',
 });
+document.getElementById('yes').onclick=function(e){
+	alert('感谢支持！');
+};
 window.init = function(songs) {
 	player.setSongs(songs);
 	player.play(0);

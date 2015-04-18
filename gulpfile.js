@@ -9,11 +9,6 @@ var css2js = require('gulp-css2js');
 var rename = require('gulp-rename');
 
 gulp.task('build', function() {
-	var js = gulp.src('src/*.js')
-		.pipe(uglify())
-		.pipe(rename({suffix:'.min'}))
-		.pipe(gulp.dest('dist/'))
-	;
 	return merge(
 		gulp.src('src/*.less')
 			.pipe(less())
@@ -21,7 +16,10 @@ gulp.task('build', function() {
 			.pipe(rename({suffix:'.min'}))
 			.pipe(gulp.dest('dist/'))
 			.pipe(css2js()),
-		js
+		gulp.src('src/*.js')
+			.pipe(uglify())
+			.pipe(rename({suffix:'.min'}))
+			.pipe(gulp.dest('dist/'))
 	).pipe(concat('player-with-css.js'))
 		.pipe(uglify())
 		.pipe(rename({suffix:'.min'}))

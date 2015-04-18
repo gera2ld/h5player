@@ -3,20 +3,34 @@ function Player(options) {
 	this.init();
 }
 Player.prototype = {
+	_classes: {
+	  list: 'fa fa-list',
+    prev: 'fa fa-step-backward',
+		play: 'fa fa-play',
+    next: 'fa fa-step-forward',
+		pause: 'fa fa-pause',
+	},
+	extend: function(dict1, dict2) {
+		for(var i in dict2) dict1[i] = dict2[i];
+		return dict1;
+	},
 	init: function() {
 		var self = this;
 		var container = self.options.container;
+		self.classes = self.extend({}, self._classes);
+		if(self.options.classes)
+			self.extend(self.classes, self.options.classes);
 		container.classList.add('ge-player');
 		container.innerHTML =
 			'<div class="image"></div>'+
 			'<div class="buttons">'+
-				'<span data="list" class="fa fa-list"></span>'+
+				'<i data="list" class="'+self.classes['list']+'"></i>'+
 			'</div>'+
 			'<div class="control">'+
 				'<div class="title"></div>'+
-				'<span data="prev" class="fa fa-step-backward"></span>'+
-				'<span data="play" class="fa fa-play"></span>'+
-				'<span data="next" class="fa fa-step-forward"></span>'+
+				'<i data="prev" class="'+self.classes['prev']+'"></i>'+
+				'<i data="play" class="'+self.classes['play']+'"></i>'+
+				'<i data="next" class="'+self.classes['next']+'"></i>'+
 			'</div>'+
 			'<div class=progress>'+
 				'<div class="wrap">'+
@@ -71,8 +85,12 @@ Player.prototype = {
 			var cmd = ['add', 'remove'];
 			if(e.type == 'pause') cmd.reverse();
 			var playcls = self.btplay.classList;
-			playcls[cmd[1]]('fa-play');
-			playcls[cmd[0]]('fa-pause');
+			self.classes['play'].split(/\s+/).forEach(function(c){
+				playcls[cmd[1]](c);
+			});
+			self.classes['pause'].split(/\s+/).forEach(function(c){
+				playcls[cmd[0]](c);
+			});
 			self.image.classList[cmd[0]]('ge-roll');
 		};
 		self.audio.addEventListener('play', playStatusChange, false);
