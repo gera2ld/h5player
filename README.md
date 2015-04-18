@@ -40,6 +40,6 @@ player.play(0);
 
 Examples
 ---
-<http://wx.geraldl.net/player/>
+<http://gerald.top/code/h5player>
 
 ![snapshot](snapshots/player.png)
