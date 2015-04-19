@@ -51,6 +51,8 @@ Player.prototype = {
 		self.prcur = container.querySelector('.cursor');
 		self.prtime = container.querySelector('.time');
 		self.audio = new Audio;
+		if(self.options.image)
+					self.image.innerHTML = '<img src="' + self.safeHTML(self.options.image) + '">';
 		self.setSongs([]);
 		self.bindEvents();
 	},
@@ -67,7 +69,9 @@ Player.prototype = {
 			self.play(self.next());
 		}, false);
 		self.btplay.addEventListener('click', function(e) {
-			if(self.audio.paused)
+			if(self.current < 0)
+				self.play(0);
+			else if(self.audio.paused)
 				self.audio.play();
 			else
 				self.audio.pause();
