@@ -34,7 +34,7 @@ Player.prototype = {
 			'</div>'+
 			'<div class=progress>'+
 				'<div class="wrap">'+
-					'<div class="bar"></div>'+
+					'<div class="bar"><div class="played"></div></div>'+
 					'<div class="cursor"></div>'+
 					'<div class="time"></div>'+
 				'</div>'+
@@ -48,8 +48,10 @@ Player.prototype = {
 		self.btnext = container.querySelector('*[data=next]');
 		self.btplaylist = container.querySelector('*[data=list]');
 		self.playlist = container.querySelector('.playlist');
+		self.prbar = container.querySelector('.bar');
 		self.prcur = container.querySelector('.cursor');
 		self.prtime = container.querySelector('.time');
+		self.brplayed = container.querySelector('.played');
 		self.audio = new Audio;
 		if(self.options.image)
 					self.image.innerHTML = '<img src="' + self.safeHTML(self.options.image) + '">';
@@ -58,6 +60,7 @@ Player.prototype = {
 	},
 	bindEvents: function() {
 		var self = this;
+		var cursorData = null;
 		self.btplaylist.addEventListener('click', function(e) {
 			this.classList.toggle('active');
 			self.playlist.classList.toggle('hide');
@@ -81,8 +84,13 @@ Player.prototype = {
 		}, false);
 		self.audio.addEventListener('timeupdate', function(e) {
 			var currentTime = this.currentTime;
-			var duration = self.duration || this.duration;
-			self.prcur.style.left = duration ? (currentTime / duration * 100) + '%' : 0;
+			var duration = self.duration;
+			if(!duration) duration = self.duration = this.duration;
+			if(!cursorData) {
+				var played = duration ? (currentTime / duration * 100) + '%' : 0;
+				self.prcur.style.left = played;
+				self.brplayed.style.width = played;
+			}
 			self.prtime.innerHTML = self.timestr(currentTime) + '/' + self.timestr(duration);
 		}, false);
 		var playStatusChange = function(e) {
@@ -102,6 +110,45 @@ Player.prototype = {
 		self.playlist.addEventListener('click', function(e) {
 			var i = Array.prototype.indexOf.call(this.childNodes, e.target);
 			if(i >= 0) self.play(i);
+		}, false);
+		self.prcur.addEventListener('mousedown', function(e) {
+			e.preventDefault();
+			cursorData = {
+				delta: e.clientX - self.brplayed.offsetWidth,
+			};
+			self.options.container.addEventListener('mousemove', movingCursor, false);
+			self.options.container.addEventListener('mouseup', endMovingCursor, false);
+			self.options.container.addEventListener('mouseleave', stopMovingCursor, false);
+		}, false);
+		var setCursor = function(x, play) {
+			var newPos = x / self.prbar.offsetWidth;
+			if(newPos < 0) newPos = 0;
+			else if(newPos > 1) newPos = 1;
+			self.prcur.style.left = self.brplayed.style.width = newPos * 100 + '%';
+			if(play) self.audio.currentTime = ~~ (newPos * self.duration);
+		};
+		var movingCursor = function(e) {
+			setCursor(e.clientX - cursorData.delta);
+		};
+		var stopMovingCursor = function(e) {
+			cursorData = null;
+			self.options.container.removeEventListener('mousemove', movingCursor, false);
+			self.options.container.removeEventListener('mouseup', endMovingCursor, false);
+			self.options.container.removeEventListener('mouseleave', stopMovingCursor, false);
+		};
+		var endMovingCursor = function(e) {
+			e.preventDefault();
+			setCursor(e.clientX - cursorData.delta, true);
+			stopMovingCursor(e);
+		};
+		self.prbar.addEventListener('click', function(e) {
+			e.preventDefault();
+			var x = e.offsetX;
+			if(!x) {
+				var rect = e.target.getBoundingClientRect();
+				x = e.pageX - (rect.left + window.pageXOffset - document.documentElement.clientLeft);
+			}
+			setCursor(x, true);
 		}, false);
 	},
 	safeHTML: function(html) {
@@ -154,6 +201,7 @@ Player.prototype = {
 			}
 			self.prtime.innerHTML = '';
 			self.prcur.style.left = 0;
+			self.brplayed.style.width = 0;
 			self.audio.play();
 		}
 	},

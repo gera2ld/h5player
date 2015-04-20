@@ -20,7 +20,8 @@
 }
 .ge-player{
 	background: #fff;
-	border: 1px solid;
+	box-shadow: 0 0 10px gray;
+	border-radius: 3px;
 	position: relative;
 	max-width: 400px;
 	i {
@@ -61,17 +62,29 @@
 	}
 	.progress{
 		padding: 1em;
+		@bg-color: silver;
+		@cur-color: white;
+		@played-color: brown;
 		.wrap {
 			position: relative;
 		}
 		.bar {
-			border: 1px solid gray;
-			height: 1px;
+			height: 2px;
+			background: @bg-color;
+			position: relative;
+		}
+		.played {
+			position: absolute;
+			top: 0;
+			left: 0;
+			height: 2px;
+			background: @played-color;
 		}
 		.cursor{
 			cursor: pointer;
 			position: absolute;
-			background: gray;
+			border: 1px solid @bg-color;
+			background: @cur-color;
 			border-radius: 50%;
 			width: 10px;
 			height: 10px;
