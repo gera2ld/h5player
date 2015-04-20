@@ -7,6 +7,7 @@ var less = require('gulp-less');
 var minifyCss = require('gulp-minify-css');
 var css2js = require('gulp-css2js');
 var rename = require('gulp-rename');
+var wrap = require('gulp-wrap');
 
 gulp.task('build', function() {
 	return merge(
@@ -17,6 +18,8 @@ gulp.task('build', function() {
 			.pipe(gulp.dest('dist/'))
 			.pipe(css2js()),
 		gulp.src('src/*.js')
+			.pipe(concat('player.js'))
+			.pipe(wrap('(function(){\n<%=contents%>\n}).call({});'))
 			.pipe(uglify())
 			.pipe(rename({suffix:'.min'}))
 			.pipe(gulp.dest('dist/'))

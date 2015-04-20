@@ -61,24 +61,25 @@ Player.prototype = {
 	bindEvents: function() {
 		var self = this;
 		var cursorData = null;
-		self.btplaylist.addEventListener('click', function(e) {
+		var evtHandler = new EventHandler(self.options.container);
+		evtHandler.addListener(self.btplaylist, 'click', function(e) {
 			this.classList.toggle('active');
 			self.playlist.classList.toggle('hide');
-		}, false);
-		self.btprev.addEventListener('click', function(e) {
+		});
+		evtHandler.addListener(self.btprev, 'click', function(e) {
 			self.play(self.previous());
-		}, false);
-		self.btnext.addEventListener('click', function(e) {
+		});
+		evtHandler.addListener(self.btnext, 'click', function(e) {
 			self.play(self.next());
-		}, false);
-		self.btplay.addEventListener('click', function(e) {
+		});
+		evtHandler.addListener(self.btplay, 'click', function(e) {
 			if(self.current < 0)
 				self.play(0);
 			else if(self.audio.paused)
 				self.audio.play();
 			else
 				self.audio.pause();
-		}, false);
+		});
 		self.audio.addEventListener('ended', function(e) {
 			self.play(self.next());
 		}, false);
@@ -107,19 +108,10 @@ Player.prototype = {
 		};
 		self.audio.addEventListener('play', playStatusChange, false);
 		self.audio.addEventListener('pause', playStatusChange, false);
-		self.playlist.addEventListener('click', function(e) {
+		evtHandler.addListener(self.playlist, 'click', function(e) {
 			var i = Array.prototype.indexOf.call(this.childNodes, e.target);
 			if(i >= 0) self.play(i);
-		}, false);
-		self.prcur.addEventListener('mousedown', function(e) {
-			e.preventDefault();
-			cursorData = {
-				delta: e.clientX - self.brplayed.offsetWidth,
-			};
-			self.options.container.addEventListener('mousemove', movingCursor, false);
-			self.options.container.addEventListener('mouseup', endMovingCursor, false);
-			self.options.container.addEventListener('mouseleave', stopMovingCursor, false);
-		}, false);
+		});
 		var setCursor = function(x, play) {
 			var newPos = x / self.prbar.offsetWidth;
 			if(newPos < 0) newPos = 0;
@@ -127,29 +119,39 @@ Player.prototype = {
 			self.prcur.style.left = self.brplayed.style.width = newPos * 100 + '%';
 			if(play) self.audio.currentTime = ~~ (newPos * self.duration);
 		};
+		evtHandler.addListener(self.prbar, 'click', function(e) {
+			e.preventDefault();
+			var x = evtHandler.getPoint(e).x;
+			setCursor(x, true);
+		});
 		var movingCursor = function(e) {
-			setCursor(e.clientX - cursorData.delta);
+			if(cursorData) {
+				cursorData.moved = true;
+				setCursor(e.clientX - cursorData.delta);
+			}
 		};
 		var stopMovingCursor = function(e) {
-			cursorData = null;
-			self.options.container.removeEventListener('mousemove', movingCursor, false);
-			self.options.container.removeEventListener('mouseup', endMovingCursor, false);
-			self.options.container.removeEventListener('mouseleave', stopMovingCursor, false);
+			if(cursorData) {
+				e.preventDefault();
+				cursorData = null;
+			}
 		};
 		var endMovingCursor = function(e) {
-			e.preventDefault();
-			setCursor(e.clientX - cursorData.delta, true);
-			stopMovingCursor(e);
-		};
-		self.prbar.addEventListener('click', function(e) {
-			e.preventDefault();
-			var x = e.offsetX;
-			if(!x) {
-				var rect = e.target.getBoundingClientRect();
-				x = e.pageX - (rect.left + window.pageXOffset - document.documentElement.clientLeft);
+			if(cursorData) {
+				setCursor(e.clientX - cursorData.delta, true);
+				stopMovingCursor(e);
 			}
-			setCursor(x, true);
-		}, false);
+		};
+		var startMovingCursor = function(e) {
+			e.preventDefault();
+			cursorData = {
+				delta: e.clientX - self.brplayed.offsetWidth,
+			};
+		};
+		evtHandler.addListener(self.prcur, 'mousedown', startMovingCursor);
+		evtHandler.addListener(self.options.container, 'mousemove', movingCursor);
+		evtHandler.addListener(self.options.container, 'mouseup', endMovingCursor);
+		evtHandler.addListener(self.options.container, 'mouseleave', stopMovingCursor);
 	},
 	safeHTML: function(html) {
 		return html.replace(/[&"<]/g, function(m) {
@@ -220,3 +222,4 @@ Player.prototype = {
 		return m + ':' + s;
 	},
 };
+window.Player = Player;
