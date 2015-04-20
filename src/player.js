@@ -34,7 +34,9 @@ Player.prototype = {
 			'</div>'+
 			'<div class=progress>'+
 				'<div class="wrap">'+
-					'<div class="bar"><div class="played"></div></div>'+
+					'<div class="barwrap">'+
+						'<div class="bar"><div class="played"></div></div>'+
+					'</div>'+
 					'<div class="cursor"></div>'+
 					'<div class="time"></div>'+
 				'</div>'+
@@ -48,7 +50,7 @@ Player.prototype = {
 		self.btnext = container.querySelector('*[data=next]');
 		self.btplaylist = container.querySelector('*[data=list]');
 		self.playlist = container.querySelector('.playlist');
-		self.prbar = container.querySelector('.bar');
+		self.prwrap = container.querySelector('.barwrap');
 		self.prcur = container.querySelector('.cursor');
 		self.prtime = container.querySelector('.time');
 		self.brplayed = container.querySelector('.played');
@@ -113,13 +115,13 @@ Player.prototype = {
 			if(i >= 0) self.play(i);
 		});
 		var setCursor = function(x, play) {
-			var newPos = x / self.prbar.offsetWidth;
+			var newPos = x / self.prwrap.offsetWidth;
 			if(newPos < 0) newPos = 0;
 			else if(newPos > 1) newPos = 1;
 			self.prcur.style.left = self.brplayed.style.width = newPos * 100 + '%';
 			if(play) self.audio.currentTime = ~~ (newPos * self.duration);
 		};
-		evtHandler.addListener(self.prbar, 'click', function(e) {
+		evtHandler.addListener(self.prwrap, 'click', function(e) {
 			e.preventDefault();
 			var x = evtHandler.getPoint(e).x;
 			setCursor(x, true);
@@ -151,7 +153,7 @@ Player.prototype = {
 		evtHandler.addListener(self.prcur, 'mousedown', startMovingCursor);
 		evtHandler.addListener(self.options.container, 'mousemove', movingCursor);
 		evtHandler.addListener(self.options.container, 'mouseup', endMovingCursor);
-		evtHandler.addListener(self.options.container, 'mouseleave', stopMovingCursor);
+		self.options.container.addEventListener('mouseleave', stopMovingCursor, false);
 	},
 	safeHTML: function(html) {
 		return html.replace(/[&"<]/g, function(m) {

@@ -62,35 +62,39 @@
 	}
 	.progress{
 		padding: 1em;
-		@bg-color: silver;
+		@bar-color: silver;
 		@cur-color: white;
 		@played-color: brown;
+		@bar-height: 2px;
+		@cur-height: 10px;
+		@cur-width: 10px;
 		.wrap {
 			position: relative;
 		}
+		.barwrap {
+			padding: (@cur-height - @bar-height) / 2 0;
+		}
 		.bar {
-			height: 2px;
-			background: @bg-color;
+			height: @bar-height;
+			background: @bar-color;
 			position: relative;
 		}
 		.played {
 			position: absolute;
 			top: 0;
-			left: 0;
-			height: 2px;
+			height: @bar-height;
 			background: @played-color;
 		}
 		.cursor{
 			cursor: pointer;
 			position: absolute;
-			border: 1px solid @bg-color;
+			border: 1px solid @bar-color;
 			background: @cur-color;
 			border-radius: 50%;
-			width: 10px;
-			height: 10px;
-			top: -4px;
-			margin-left: -5px;
-			left: 0;
+			width: @cur-width;
+			height: @cur-height;
+			top: 0;
+			margin-left: -@cur-width / 2;
 		}
 		.time{
 			position: absolute;
