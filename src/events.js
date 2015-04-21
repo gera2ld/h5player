@@ -69,7 +69,7 @@ if('ontouchstart' in window) {
 						for(i in e) evt[i] = e[i];
 						evt.preventDefault = self.ignore;
 						evt.stopPropagation = stopPropagation;
-						func(evt);
+						func.call(target, evt);
 					});
 				}
 			};
@@ -93,25 +93,26 @@ if('ontouchstart' in window) {
 				e.preventDefault();
 				if(e.type == 'touchstart')
 					self.forEach(e.changedTouches, function(e) {
-						self.touches[e.identifier] = [false, e];
+						self.touches[e.identifier] = {evt: e};
 						self.call('mousedown', e);
 					});
 				else if(e.type == 'touchmove')
 					self.forEach(e.changedTouches, function(e) {
-						var old = self.touches[e.identifier];
-						self.touches[e.identifier] = [
-							Math.abs(e.clientX-old.clientX) > self.threshold
-							|| Math.abs(e.clientY-old.clientY) > self.threshold,
-							e
-						];
-						self.call('mousemove', e);
+						var touch = self.touches[e.identifier];
+						var old = touch.evt;
+						touch.moved = Math.abs(e.clientX - old.clientX) > self.threshold
+							|| Math.abs(e.clientY - old.clientY) > self.threshold;
+						if(touch.moved) {
+							touch.evt = e;
+							self.call('mousemove', e);
+						}
 					});
 				else if(e.type == 'touchend')
 					self.forEach(e.changedTouches, function(e) {
 						self.call('mouseup',e);
-						var t = self.touches[e.identifier];
+						var touch = self.touches[e.identifier];
 						delete self.touches[e.identifier];
-						if(t && !t[0])
+						if(touch && !touch.moved)
 							self.call('click', e);
 					});
 			};
