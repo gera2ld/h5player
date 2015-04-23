@@ -55,6 +55,11 @@ Player.prototype = {
 		self.prtime = container.querySelector('.time');
 		self.brplayed = container.querySelector('.played');
 		self.audio = new Audio;
+		self.rotateData = {
+			deg: 0,
+			rotating: false,
+		};
+		self.doRotate = self._doRotate.bind(self);
 		if(self.options.image)
 					self.image.innerHTML = '<img src="' + self.safeHTML(self.options.image) + '">';
 		self.setSongs([]);
@@ -106,7 +111,7 @@ Player.prototype = {
 			self.classes[status[1]].split(/\s+/).forEach(function(c){
 				playcls.add(c);
 			});
-			self.image.classList[e.type=='play'?'add':'remove']('ge-roll');
+			self.rotate(e.type=='play');
 		};
 		self.audio.addEventListener('play', playStatusChange, false);
 		self.audio.addEventListener('pause', playStatusChange, false);
@@ -155,6 +160,23 @@ Player.prototype = {
 		evtHandler.addListener(self.options.container, 'mouseup', endMovingCursor);
 		self.options.container.addEventListener('mouseleave', stopMovingCursor, false);
 	},
+	_doRotate: function() {
+		var self = this;
+		var data = self.rotateData;
+		self.image.setAttribute('style',
+														'-webkit-transform:rotate(' + data.deg + 'deg);' +
+														'transform:rotate(' + data.deg + 'deg);');
+		data.deg += .5;
+		if(data.deg >= 360) data.deg -= 360;
+		if(data.rotating)
+			requestAnimationFrame(self.doRotate);
+	},
+	rotate: function(rotating) {
+		var self = this;
+		var data = self.rotateData;
+		if(data.rotating != rotating)
+			if(data.rotating = rotating) self.doRotate();
+	},
 	safeHTML: function(html) {
 		return html.replace(/[&"<]/g, function(m) {
 			return {
@@ -200,8 +222,10 @@ Player.prototype = {
 				self.audio.src = song.url;
 				self.duration = song.duration ? song.duration / 1000 : null;
 				var image = song.image || self.options.image;
-				if(image)
+				if(image) {
 					self.image.innerHTML = '<img src="' + self.safeHTML(image) + '">';
+					self.rotateData.deg = 0;
+				}
 			}
 			self.prtime.innerHTML = '';
 			self.prcur.style.left = 0;
