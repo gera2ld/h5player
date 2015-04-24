@@ -36,6 +36,10 @@
 		height: 130px;
 		left: 10px;
 		top: 10px;
+		-webkit-animation: ge-roll 8s linear infinite;
+		animation: ge-roll 8s linear infinite;
+		-webkit-animation-play-state: paused;
+		animation-play-state: paused;
 		img {
 			width: 100%;
 			height: 100%;
@@ -43,8 +47,8 @@
 		}
 	}
 	.ge-roll {
-		-webkit-animation: ge-roll 8s linear infinite;
-		animation: ge-roll 8s linear infinite;
+		-webkit-animation-play-state: running;
+		animation-play-state: running;
 	}
 	.buttons {
 		position: absolute;
