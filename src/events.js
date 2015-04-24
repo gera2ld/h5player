@@ -9,7 +9,7 @@ if('ontouchstart' in window) {
 		var self = this;
 		self.parent = parent;
 		self.last = null;
-		self.touches={};	// {identifier:[moved,target]}
+		self.touches={};	// {identifier:{moved,target}}
 		self.data = [];
 		self.parent.addEventListener('touchstart', self.touch(), false);
 		self.parent.addEventListener('touchmove', self.touch(), false);
@@ -100,8 +100,10 @@ if('ontouchstart' in window) {
 					self.forEach(e.changedTouches, function(e) {
 						var touch = self.touches[e.identifier];
 						var old = touch.evt;
-						touch.moved = Math.abs(e.clientX - old.clientX) > self.threshold
-							|| Math.abs(e.clientY - old.clientY) > self.threshold;
+						touch.moved = touch.moved || (
+						 	Math.abs(e.clientX - old.clientX) > self.threshold ||
+							Math.abs(e.clientY - old.clientY) > self.threshold
+						);
 						if(touch.moved) {
 							touch.evt = e;
 							self.call('mousemove', e);
