@@ -4,10 +4,10 @@ function Player(options) {
 }
 Player.prototype = {
 	_classes: {
-	  list: 'fa fa-list',
-    prev: 'fa fa-step-backward',
+		list: 'fa fa-list',
+		prev: 'fa fa-step-backward',
 		play: 'fa fa-play',
-    next: 'fa fa-step-forward',
+		next: 'fa fa-step-forward',
 		pause: 'fa fa-pause',
 	},
 	extend: function(dict1, dict2) {
@@ -24,13 +24,13 @@ Player.prototype = {
 		container.innerHTML =
 			'<div class="image"></div>' +
 			'<div class="buttons">' +
-				'<i data="list" class="button ' + self.classes['list'] + '"></i>' +
+				'<i data="list" class="button ' + self.classes.list + '"></i>' +
 			'</div>' +
 			'<div class="control">' +
 				'<div class="title"></div>' +
-				'<i data="prev" class="button ' + self.classes['prev'] + '"></i>' +
-				'<i data="play" class="button ' + self.classes['play'] + '"></i>' +
-				'<i data="next" class="button ' + self.classes['next'] + '"></i>' +
+				'<i data="prev" class="button ' + self.classes.prev + '"></i>' +
+				'<i data="play" class="button ' + self.classes.play + '"></i>' +
+				'<i data="next" class="button ' + self.classes.next + '"></i>' +
 			'</div>' +
 			'<div class="progress">' +
 				'<div class="wrap">' +

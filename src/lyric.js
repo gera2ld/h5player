@@ -1,9 +1,11 @@
 function LyricParser() {
 	this.data = [];
+	this.last = 0;
 }
 LyricParser.prototype = {
 	setLyric: function(lyric) {
 		var data = this.data = [];
+		this.last = 0;
 		if(lyric) {
 			var reg = /^\[([^\]]*)\]\s*(.*)$/;
 			lyric.split(/\n/).forEach(function(line) {
@@ -19,14 +21,22 @@ LyricParser.prototype = {
 		}
 	},
 	getLyricAtTime: function(time) {
-		var i, line;
-		var data = this.data;
-		var last = '';
-		for(i = 0; i < data.length; i ++) {
-			line = data[i];
-			if(line[0] > time) break;
-			last = line[1];
+		var self = this;
+		var data = self.data;
+		var last = self.last;
+		var line = data[last] || data[last = 0];
+		var next;
+		if(line) {
+			if(line[0] < time) {
+				while((next = data[++ last]) && next[0] <= time)
+					line = next;
+				self.last = last - 1;
+			} else {
+				while(line && line[0] > time)
+					line = data[-- last];
+				self.last = last;
+			}
 		}
-		return last;
+		return line ? line[1] : '';
 	},
 };
