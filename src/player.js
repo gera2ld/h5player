@@ -22,49 +22,51 @@ Player.prototype = {
 			self.extend(self.classes, self.options.classes);
 		container.classList.add('ge-player');
 		container.innerHTML =
-			'<div class="image"></div>'+
-			'<div class="buttons">'+
-				'<i data="list" class="'+self.classes['list']+'"></i>'+
-			'</div>'+
-			'<div class="control">'+
-				'<div class="title"></div>'+
-				'<i data="prev" class="'+self.classes['prev']+'"></i>'+
-				'<i data="play" class="'+self.classes['play']+'"></i>'+
-				'<i data="next" class="'+self.classes['next']+'"></i>'+
-			'</div>'+
-			'<div class=progress>'+
-				'<div class="wrap">'+
-					'<div class="barwrap">'+
-						'<div class="bar"><div class="played"></div></div>'+
-					'</div>'+
-					'<div class="cursor"></div>'+
-					'<div class="time"></div>'+
-				'</div>'+
-			'</div>'+
+			'<div class="image"></div>' +
+			'<div class="buttons">' +
+				'<i data="list" class="button ' + self.classes['list'] + '"></i>' +
+			'</div>' +
+			'<div class="control">' +
+				'<div class="title"></div>' +
+				'<i data="prev" class="button ' + self.classes['prev'] + '"></i>' +
+				'<i data="play" class="button ' + self.classes['play'] + '"></i>' +
+				'<i data="next" class="button ' + self.classes['next'] + '"></i>' +
+			'</div>' +
+			'<div class="progress">' +
+				'<div class="wrap">' +
+					'<div class="barwrap">' +
+						'<div class="bar"><div class="played"></div></div>' +
+					'</div>' +
+					'<div class="cursor"></div>' +
+					'<div class="time"></div>' +
+				'</div>' +
+			'</div>' +
+			'<div class="lyric"></div>' +
 			'<div class="playlist hide"></div>'
 		;
 		self.image = container.querySelector('.image');
 		self.title = container.querySelector('.title');
-		self.btprev = container.querySelector('*[data=prev]');
-		self.btplay = container.querySelector('*[data=play]');
-		self.btnext = container.querySelector('*[data=next]');
-		self.btplaylist = container.querySelector('*[data=list]');
 		self.playlist = container.querySelector('.playlist');
 		self.prwrap = container.querySelector('.barwrap');
 		self.prcur = container.querySelector('.cursor');
 		self.prtime = container.querySelector('.time');
 		self.brplayed = container.querySelector('.played');
+		self.lyric = container.querySelector('.lyric');
+		Array.prototype.forEach.call(container.querySelectorAll('.button[data]'), function(bt){
+			self['bt' + bt.getAttribute('data')] = bt;
+		});
 		self.audio = new Audio;
 		if(self.options.image)
 					self.image.innerHTML = '<img src="' + self.safeHTML(self.options.image) + '">';
 		self.setSongs([]);
+		self.lyricParser = new LyricParser();
 		self.bindEvents();
 	},
 	bindEvents: function() {
 		var self = this;
 		var cursorData = null;
 		var evtHandler = new EventHandler(self.options.container);
-		evtHandler.addListener(self.btplaylist, 'click', function(e) {
+		evtHandler.addListener(self.btlist, 'click', function(e) {
 			this.classList.toggle('active');
 			self.playlist.classList.toggle('hide');
 		});
@@ -94,7 +96,8 @@ Player.prototype = {
 				self.prcur.style.left = played;
 				self.brplayed.style.width = played;
 			}
-			self.prtime.innerHTML = self.timestr(currentTime) + '/' + self.timestr(duration);
+			self.prtime.innerHTML = self.timestr(currentTime) + ' / ' + self.timestr(duration);
+			self.lyric.innerHTML = self.safeHTML(self.lyricParser.getLyricAtTime(currentTime));
 		}, false);
 		var playStatusChange = function(e) {
 			var status = ['play', 'pause'];
@@ -184,6 +187,28 @@ Player.prototype = {
 		self.current = -1;
 		self.duration = 0;
 	},
+	getLyric: function() {
+		var self = this;
+		var song = self.songs[self.current];
+		if('lyric' in song) {
+			self.lyricParser.setLyric(song.lyric);
+		} else if('lyricjsonp' in song) {
+			var jsonp = 'setLyric' + Date.now().toString(16) + (~~ (Math.random() * 0xffff)).toString(16);
+			window[jsonp] = function(r) {
+				if(r['code'] != 200)
+					song.lyric = null;
+				else
+					self.lyricParser.setLyric(song.lyric = r.lyric);
+				delete window[jsonp];
+			};
+			var s = document.createElement('script');
+			s.src = song.lyricjsonp + (/\?/.test(song.lyricjsonp) ? '&' : '?') + 'jsonp=' + jsonp;
+			s.onload = function(){
+				document.body.removeChild(s);
+			};
+			document.body.appendChild(s);
+		}
+	},
 	play: function(i) {
 		var self = this;
 		if(i >= 0 && i < self.songs.length) {
@@ -202,6 +227,8 @@ Player.prototype = {
 				var image = song.image || self.options.image;
 				if(image)
 					self.image.innerHTML = '<img src="' + self.safeHTML(image) + '">';
+				self.lyric.innerHTML = '';
+				self.getLyric();
 			}
 			self.prtime.innerHTML = '';
 			self.prcur.style.left = 0;

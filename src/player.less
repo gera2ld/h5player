@@ -24,7 +24,7 @@
 	border-radius: 3px;
 	position: relative;
 	max-width: 400px;
-	i {
+	.button {
 		cursor: pointer;
 		&:hover,&.active {
 			color: dodgerblue;
@@ -54,6 +54,9 @@
 		position: absolute;
 		top: 10px;
 		right: 10px;
+		&>.button {
+			margin-left: 5px;
+		}
 	}
 	.control {
 		padding: 30px 10px 10px 150px;
@@ -64,8 +67,14 @@
 			font-size: 30px;
 		}
 	}
+	.lyric {
+		text-align: center;
+		color: brown;
+		font-size: .8em;
+		height: 2em;
+	}
 	.progress{
-		padding: 1em;
+		padding: .5em 1em;
 		@bar-color: silver;
 		@cur-color: white;
 		@played-color: brown;
@@ -101,6 +110,7 @@
 			margin-left: -@cur-width / 2;
 		}
 		.time{
+			font-size: .7em;
 			position: absolute;
 			right: 0;
 			top: -2em;

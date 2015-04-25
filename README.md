@@ -29,6 +29,11 @@ player.setSongs([
 		duration: 1024,
 		// optional: image path of song
 		image: 'http://example.com/path/to/image/of/song1.png',
+		// optional: lyric
+		lyric: '[00:00]lalala\n[00:03]foo\n[00:05]bar',
+		// optional: jsonp url for lyric if lyric is not provided
+		// the real link will be 'http://example.com/path/to/lyric?jsonp=randomCallbackName'
+		lyricjsonp: 'http://example.com/path/to/lyric',
 	}, {
 		name: 'Song2',
 		url: 'http://example.com/path/to/song2.mp3',
