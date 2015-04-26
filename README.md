@@ -39,6 +39,7 @@ player.setSongs([
 		url: 'http://example.com/path/to/song2.mp3',
 	}
 ]);
+// start playing songs[index] by `player.play(index)`
 player.play(0);
 </script>
 ```

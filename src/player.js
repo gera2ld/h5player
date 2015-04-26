@@ -192,21 +192,27 @@ Player.prototype = {
 		var song = self.songs[self.current];
 		if('lyric' in song) {
 			self.lyricParser.setLyric(song.lyric);
-		} else if('lyricjsonp' in song) {
-			var jsonp = 'setLyric' + Date.now().toString(16) + (~~ (Math.random() * 0xffff)).toString(16);
-			window[jsonp] = function(r) {
-				if(r['code'] != 200)
-					song.lyric = null;
-				else
-					self.lyricParser.setLyric(song.lyric = r.lyric);
-				delete window[jsonp];
-			};
-			var s = document.createElement('script');
-			s.src = song.lyricjsonp + (/\?/.test(song.lyricjsonp) ? '&' : '?') + 'jsonp=' + jsonp;
-			s.onload = function(){
-				document.body.removeChild(s);
-			};
-			document.body.appendChild(s);
+		} else {
+			self.lyricParser.setLyric();
+			if('lyricjsonp' in song) {
+				var jsonp = 'setLyric' + Date.now().toString(16) + (~~ (Math.random() * 0xffff)).toString(16);
+				window[jsonp] = function(r) {
+					if(r['code'] != 200)
+						song.lyric = null;
+					else {
+						song.lyric = r.lyric;
+						if(song === self.songs[self.current])
+							self.lyricParser.setLyric(song.lyric);
+					}
+					delete window[jsonp];
+				};
+				var s = document.createElement('script');
+				s.src = song.lyricjsonp + (/\?/.test(song.lyricjsonp) ? '&' : '?') + 'jsonp=' + jsonp;
+				s.onload = function(){
+					document.body.removeChild(s);
+				};
+				document.body.appendChild(s);
+			}
 		}
 	},
 	play: function(i) {
