@@ -1,3 +1,8 @@
+/**
+ * HTML5 Player
+ * @author Gerald <gera2ld@163.com>
+ */
+'use strict';
 function Player(options) {
 	this.options = options;
 	this.init();
@@ -246,7 +251,7 @@ Player.prototype = {
 		}
 	},
 	previous: function() {
-		return (this.current - 1) % this.songs.length;
+		return (this.current + this.songs.length - 1) % this.songs.length;
 	},
 	next: function() {
 		return (this.current + 1) % this.songs.length;

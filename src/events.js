@@ -1,8 +1,9 @@
-/*
+/**
  * Event Handler
  * Fire mouse events on touch devices
  * @author Gerald <gera2ld@163.com>
  */
+'use strict';
 function EventHandler(parent) {
 	var self = this;
 	self.parent = parent;
@@ -33,7 +34,7 @@ EventHandler.prototype = {
 		if(self.mouse)
 			ele.addEventListener(type, func, false);
 		if(self.touch) {
-			var item = self.findItem(ele);
+			var item = self.findItem(ele), i;
 			if(item) {
 				i = item.events[type];
 			} else {
