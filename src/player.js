@@ -28,6 +28,7 @@ Player.prototype = {
 			'</div>' +
 			'<div class="control">' +
 				'<div class="title"></div>' +
+				'<div class="artist"></div>' +
 				'<i data="prev" class="button ' + self.classes.prev + '"></i>' +
 				'<i data="play" class="button ' + self.classes.play + '"></i>' +
 				'<i data="next" class="button ' + self.classes.next + '"></i>' +
@@ -46,6 +47,7 @@ Player.prototype = {
 		;
 		self.image = container.querySelector('.image');
 		self.title = container.querySelector('.title');
+		self.artist = container.querySelector('.artist');
 		self.playlist = container.querySelector('.playlist');
 		self.prwrap = container.querySelector('.barwrap');
 		self.prcur = container.querySelector('.cursor');
@@ -228,6 +230,7 @@ Player.prototype = {
 				children[self.current].classList.add('active');
 				var song = self.songs[self.current];
 				self.title.innerHTML = self.safeHTML(song.name);
+				self.artist.innerHTML = self.safeHTML(song.artist || '');
 				self.audio.src = song.url;
 				self.duration = song.duration ? song.duration / 1000 : null;
 				var image = song.image || self.options.image;

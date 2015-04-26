@@ -25,6 +25,8 @@ player.setSongs([
 	{
 		name: 'Song1',
 		url: 'http://example.com/path/to/song1.mp3',
+		// optional: name of artist
+		artist: 'Gerald',
 		// optional: length of song in seconds
 		duration: 1024,
 		// optional: image path of song
