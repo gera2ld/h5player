@@ -1,5 +1,6 @@
 HTML5 Player
 ===
+![Bower](https://img.shields.io/bower/v/h5player.svg)
 
 Usage
 ---

@@ -1,0 +1,26 @@
+{
+  "name": "h5player",
+  "version": "1.0.0",
+  "authors": [
+    "Gerald <gera2ld@163.com>"
+  ],
+  "description": "HTML5 music player",
+  "main": "dist/player-with-css.min.js",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "html5",
+    "music",
+    "player"
+  ],
+  "license": "MIT",
+  "homepage": "http://gerald.top/code/h5player",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "snapshots",
+    "src"
+  ]
+}
