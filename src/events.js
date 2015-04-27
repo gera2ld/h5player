@@ -4,9 +4,70 @@
  * @author Gerald <gera2ld@163.com>
  */
 'use strict';
+
+// es6: Array.prototype.find
+if(typeof Array.prototype.find === 'undefined')
+	Array.prototype.find = function(callback) {
+		var list = this;
+		for(var i = 0; i < list.length; i ++) {
+			var item = list[i];
+			if(callback(item, i, list))
+				return item;
+		}
+	};
+
+function Events() {
+	this.data = [];
+}
+Events.prototype = {
+	getCallbacks: function(element, type, useCap, setdefault) {
+		var item = this.data.find(function(value, index, arr) {
+			return value.element === element;
+		});
+		if(!item) {
+			if(!setdefault) return;
+			item = {
+				element: element,
+				events: [{}, {}],
+			};
+			this.data.push(item);
+		}
+		var events = item.events[useCap?1:0];
+		var callbacks = events[type];
+		if(!callbacks&&setdefault) events[type] = callbacks = [];
+		return callbacks;
+	},
+	add: function(element, type, callback, useCap) {
+		var callbacks = this.getCallbacks(element, type, useCap, true);
+		callbacks.push(callback);
+	},
+	remove: function(element, type, callback, useCap) {
+		var callbacks = this.getCallbacks(element, type, useCap);
+		if(callbacks) {
+			var i = callbacks.indexOf(callback);
+			if(i >= 0) callbacks.splice(i, 1);
+		}
+	},
+	forEachEvent: function(callback) {
+		this.data.forEach(function(item) {
+			function walk(events, useCap) {
+				for(var type in events) {
+					var funcs = events[type];
+					funcs.forEach(function(func) {
+						callback(item.element, type, func, useCap);
+					});
+				}
+			}
+			walk(item.events[0], false);
+			walk(item.events[1], true);
+		});
+	},
+};
+
 function EventHandler(parent) {
 	var self = this;
 	self.parent = parent;
+	self.dataEvent = new Events();
 	if('ontouchstart' in window) self.initTouch();
 	else if('onmousedown' in window) self.mouse = true;
 };
@@ -16,75 +77,49 @@ EventHandler.prototype = {
 		var self = this;
 		var touch = self.touchHandler.bind(self);
 		self.touch = true;
-		self.parent.addEventListener('touchstart', touch, false);
-		self.parent.addEventListener('touchmove', touch, false);
-		self.parent.addEventListener('touchend', touch, false);
+		self.dataTouch = new Events();
+		self.on(self.parent, 'touchstart', touch);
+		self.on(self.parent, 'touchmove', touch);
+		self.on(self.parent, 'touchend', touch);
 		self.touches={};	// {identifier:{moved,target}}
-		self.data = [];
 	},
-	findItem: function(ele) {
-		var data = this.data, i, item;
-		for(i = 0; i < data.length; i ++) {
-			item = data[i];
-			if(item.element === ele) return item;
-		}
+	on: function(ele, type, func, useCap) {
+		this.dataEvent.add(ele, type, func, useCap);
+		ele.addEventListener(type, func, useCap);
 	},
-	addListener: function(ele, type, func) {
+	off: function(ele, type, func, useCap) {
+		this.dataEvent.remove(ele, type, func, useCap);
+		ele.removeEventListener(type, func, useCap);
+	},
+	delegate: function(ele, type, func, useCap) {
 		var self = this;
 		if(self.mouse)
-			ele.addEventListener(type, func, false);
-		if(self.touch) {
-			var item = self.findItem(ele), i;
-			if(item) {
-				i = item.events[type];
-			} else {
-				item = {
-					element: ele,
-					events: {},
-				};
-				self.data.push(item);
-				i = null;
-			}
-			if(!i) item.events[type] = i = [];
-			i.push(func);
-		}
+			self.on(ele, type, func, useCap);
+		if(self.touch)
+			self.dataTouch.add(ele, type, func, useCap);
 	},
-	removeListener: function(ele, type, func) {
+	undelegate: function(ele, type, func, useCap) {
 		var self = this;
 		if(self.mouse)
-			ele.removeEventListener(type, func, false);
-		if(self.touch) {
-			var item = self.findItem(ele), funcs, i;
-			if(item) {
-				funcs = item.events[type];
-				if(funcs) {
-					i = funcs.indexOf(func);
-					if(i >= 0) funcs.splice(i, 1);
-				}
-			}
-		}
+			self.off(ele, type, func, useCap);
+		if(self.touch)
+			self.dataTouch.remove(ele, type, func, useCap);
 	},
 	ignore: function(){},
+	forEach: function(arr, callback) {
+		Array.prototype.forEach.call(arr, callback);
+	},
 	fire: function(type, e) {
 		var self = this;
 		var callTarget = function(target) {
-			var i, item = null;
-			for(i = 0; i < self.data.length; i ++) {
-				if(self.data[i].element === target) {
-					item = self.data[i];
-					break;
-				}
-			}
-			if(item) {
-				var funcs = item.events[type];
-				if(funcs) self.forEach(funcs, function(func) {
-					var evt = {type: type}, i;
-					for(i in e) evt[i] = e[i];
-					evt.preventDefault = self.ignore;
-					evt.stopPropagation = stopPropagation;
-					func.call(target, evt);
-				});
-			}
+			var callbacks = self.dataTouch.getCallbacks(target, type);
+			if(callbacks) self.forEach(callbacks, function(func) {
+				var evt = {type: type}, i;
+				for(i in e) evt[i] = e[i];
+				evt.preventDefault = self.ignore;
+				evt.stopPropagation = stopPropagation;
+				func.call(target, evt);
+			});
 		};
 		var propagationStopped = false;
 		var stopPropagation = function() {
@@ -96,9 +131,6 @@ EventHandler.prototype = {
 			if(propagationStopped || target === self.parent) break;
 			target = target.parentNode;
 		}
-	},
-	forEach: function(arr, callback) {
-		Array.prototype.forEach.call(arr, callback);
 	},
 	touchHandler: function(e) {
 		var self = this;
@@ -142,5 +174,13 @@ EventHandler.prototype = {
 			x: e.pageX - (rect.left + win.pageXOffset - docEle.clientLeft),
 			y: e.pageY - (rect.top + win.pageYOffset - docEle.clientTop),
 		};
+	},
+	destroy: function() {
+		var self = this;
+		self.dataEvent.forEachEvent(function(element, type, func, useCap) {
+			element.removeEventListener(type, func, useCap);
+		});
+		self.dataTouch = null;
+		self.dataEvent = null;
 	},
 };

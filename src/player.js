@@ -50,15 +50,16 @@ Player.prototype = {
 			'<div class="lyric"></div>' +
 			'<div class="playlist hide"></div>'
 		;
-		self.image = container.querySelector('.image');
-		self.title = container.querySelector('.title');
-		self.artist = container.querySelector('.artist');
-		self.playlist = container.querySelector('.playlist');
-		self.prwrap = container.querySelector('.barwrap');
-		self.prcur = container.querySelector('.cursor');
-		self.prtime = container.querySelector('.time');
-		self.brplayed = container.querySelector('.played');
-		self.lyric = container.querySelector('.lyric');
+		var $ = container.querySelector.bind(container);
+		self.image = $('.image');
+		self.title = $('.title');
+		self.artist = $('.artist');
+		self.playlist = $('.playlist');
+		self.prwrap = $('.barwrap');
+		self.prcur = $('.cursor');
+		self.prtime = $('.time');
+		self.brplayed = $('.played');
+		self.lyric = $('.lyric');
 		Array.prototype.forEach.call(container.querySelectorAll('.button[data]'), function(bt){
 			self['bt' + bt.getAttribute('data')] = bt;
 		});
@@ -72,29 +73,13 @@ Player.prototype = {
 	bindEvents: function() {
 		var self = this;
 		var cursorData = null;
-		var evtHandler = new EventHandler(self.options.container);
-		evtHandler.addListener(self.btlist, 'click', function(e) {
-			this.classList.toggle('active');
-			self.playlist.classList.toggle('hide');
-		});
-		evtHandler.addListener(self.btprev, 'click', function(e) {
-			self.play(self.previous());
-		});
-		evtHandler.addListener(self.btnext, 'click', function(e) {
-			self.play(self.next());
-		});
-		evtHandler.addListener(self.btplay, 'click', function(e) {
-			if(self.current < 0)
-				self.play(0);
-			else if(self.audio.paused)
-				self.audio.play();
-			else
-				self.audio.pause();
-		});
-		self.audio.addEventListener('ended', function(e) {
-			self.play(self.next());
-		}, false);
-		self.audio.addEventListener('timeupdate', function(e) {
+		var evtHandler = self.evtHandler = new EventHandler(self.options.container);
+		evtHandler.delegate(self.btlist, 'click', self.toggleList.bind(self));
+		evtHandler.delegate(self.btprev, 'click', self.playPrev.bind(self));
+		evtHandler.delegate(self.btnext, 'click', self.playNext.bind(self));
+		evtHandler.delegate(self.btplay, 'click', self.togglePlay.bind(self));
+		evtHandler.on(self.audio, 'ended', self.playAnother.bind(self));
+		evtHandler.on(self.audio, 'timeupdate', function(e) {
 			var currentTime = this.currentTime;
 			var duration = self.duration;
 			if(!duration) duration = self.duration = this.duration;
@@ -105,7 +90,7 @@ Player.prototype = {
 			}
 			self.prtime.innerHTML = self.timestr(currentTime) + ' / ' + self.timestr(duration);
 			self.lyric.innerHTML = self.safeHTML(self.lyricParser.getLyricAtTime(currentTime));
-		}, false);
+		});
 		var playStatusChange = function(e) {
 			var status = ['play', 'pause'];
 			if(e.type == 'pause') status.reverse();
@@ -118,9 +103,9 @@ Player.prototype = {
 			});
 			self.image.classList[e.type=='play'?'add':'remove']('ge-roll');
 		};
-		self.audio.addEventListener('play', playStatusChange, false);
-		self.audio.addEventListener('pause', playStatusChange, false);
-		evtHandler.addListener(self.playlist, 'click', function(e) {
+		evtHandler.on(self.audio, 'play', playStatusChange);
+		evtHandler.on(self.audio, 'pause', playStatusChange);
+		evtHandler.delegate(self.playlist, 'click', function(e) {
 			var i = Array.prototype.indexOf.call(this.childNodes, e.target);
 			if(i >= 0) self.play(i);
 		});
@@ -131,7 +116,7 @@ Player.prototype = {
 			self.prcur.style.left = self.brplayed.style.width = newPos * 100 + '%';
 			if(play) self.audio.currentTime = ~~ (newPos * self.duration);
 		};
-		evtHandler.addListener(self.prwrap, 'click', function(e) {
+		evtHandler.delegate(self.prwrap, 'click', function(e) {
 			e.preventDefault();
 			var x = evtHandler.getPoint(e).x;
 			setCursor(x, true);
@@ -160,10 +145,10 @@ Player.prototype = {
 				delta: e.clientX - self.brplayed.offsetWidth,
 			};
 		};
-		evtHandler.addListener(self.prcur, 'mousedown', startMovingCursor);
-		evtHandler.addListener(self.options.container, 'mousemove', movingCursor);
-		evtHandler.addListener(self.options.container, 'mouseup', endMovingCursor);
-		self.options.container.addEventListener('mouseleave', stopMovingCursor, false);
+		evtHandler.delegate(self.prcur, 'mousedown', startMovingCursor);
+		evtHandler.delegate(self.options.container, 'mousemove', movingCursor);
+		evtHandler.delegate(self.options.container, 'mouseup', endMovingCursor);
+		evtHandler.on(self.options.container, 'mouseleave', stopMovingCursor);
 	},
 	safeHTML: function(html) {
 		return html.replace(/[&"<]/g, function(m) {
@@ -174,13 +159,40 @@ Player.prototype = {
 			}[m];
 		});
 	},
+	toggleList: function() {
+		var self = this;
+		self.btlist.classList.toggle('active');
+		self.playlist.classList.toggle('hide');
+	},
+	togglePlay: function() {
+		var self = this;
+		if(self.current < 0)
+			self.play(0);
+		else if(self.audio.paused)
+			self.audio.play();
+		else
+			self.audio.pause();
+	},
+	playPrev: function() {
+		this.play(this.previous());
+	},
+	playNext: function() {
+		this.play(this.next());
+	},
+	playAnother: function() {
+		// TODO: add other modes
+		this.playNext();
+	},
 	/**
 	 * songs should be a list of song objects:
 	 * {
 	 *   name: string
 	 *   url: string
-	 *   image: (optional) string
+	 *   artist: (optional) string
 	 *   duration: (optional) int (seconds)
+	 *   image: (optional) string
+	 *   lyric: (optional) string
+	 *   lyricjsonp: (optional) string
 	 * }
 	 */
 	setSongs: function(songs) {
@@ -194,7 +206,7 @@ Player.prototype = {
 		self.current = -1;
 		self.duration = 0;
 	},
-	getLyric: function() {
+	getLyric: function(timeout) {
 		var self = this;
 		var song = self.songs[self.current];
 		if('lyric' in song) {
@@ -203,6 +215,7 @@ Player.prototype = {
 			self.lyricParser.setLyric();
 			if('lyricjsonp' in song) {
 				var jsonp = 'setLyric' + Date.now().toString(16) + (~~ (Math.random() * 0xffff)).toString(16);
+				var timeoutObj;
 				window[jsonp] = function(r) {
 					if(r['code'] != 200)
 						song.lyric = null;
@@ -212,6 +225,10 @@ Player.prototype = {
 							self.lyricParser.setLyric(song.lyric);
 					}
 					delete window[jsonp];
+					if(timeoutObj) {
+						clearTimeout(timeoutObj);
+						timeoutObj = null;
+					}
 				};
 				var s = document.createElement('script');
 				s.src = song.lyricjsonp + (/\?/.test(song.lyricjsonp) ? '&' : '?') + 'jsonp=' + jsonp;
@@ -219,6 +236,10 @@ Player.prototype = {
 					document.body.removeChild(s);
 				};
 				document.body.appendChild(s);
+				if(timeout) timeoutObj = setTimeout(function() {
+					delete window[jsonp];
+					timeoutObj = null;
+				}, timeout);
 			}
 		}
 	},
@@ -242,7 +263,7 @@ Player.prototype = {
 				if(image)
 					self.image.innerHTML = '<img src="' + self.safeHTML(image) + '">';
 				self.lyric.innerHTML = '';
-				self.getLyric();
+				self.getLyric(10000);
 			}
 			self.prtime.innerHTML = '';
 			self.prcur.style.left = 0;
@@ -263,6 +284,15 @@ Player.prototype = {
 		if(s < 10) s = '0' + s;
 		if(m < 10) m = '0' + m;
 		return m + ':' + s;
+	},
+	destroy: function() {
+		var self = this;
+		self.evtHandler.destroy();
+		self.evtHandler = null;
+		self.lyricParser = null;
+		self.audio.src = '';
+		self.audio = null;
+		self.options.container.innerHTML = '';
 	},
 };
 window.Player = Player;
