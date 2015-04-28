@@ -37,7 +37,7 @@ Player.prototype = {
 		container.classList.add('ge-player');
 		var i = self.themes.indexOf(self.options.theme);
 		if(i < 0) i = 0;
-		container.classList.add(self.theme = self.themes[i]);
+		container.classList.add('ge-player-' + (self.theme = self.themes[i]));
 		container.innerHTML =
 			'<div class="image"></div>' +
 			'<div class="buttons">' +

@@ -85,8 +85,8 @@ The `Player` object has following methods:
 	* lyricjsonp: *optional*  
 	  string, a JSONP URL to be used if *lyric* is not provided. If *lyricjsonp* is `http://example.com/path/to/lyric`, the request URL will be `http://example.com/path/to/lyric?jsonp=randomCallbackName`.
 
-	* play(*int* index)  
-	  start playing the *index*-th song.
+* play(*int* index)  
+  start playing the *index*-th song.
 
 Cases
 ---

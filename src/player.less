@@ -18,6 +18,9 @@
 		transform: rotate(360deg);
 	}
 }
+
+@bar-height: 2px;
+@bar-color: silver;
 .ge-player {
 	background: #fff;
 	box-shadow: 0 0 10px gray;
@@ -38,8 +41,6 @@
 	.title {
 		font-weight: bold;
 	}
-	@bar-height: 2px;
-	@bar-color: silver;
 	.progress {
 		@played-color: brown;
 		.wrap {
@@ -57,154 +58,154 @@
 			background: @played-color;
 		}
 	}
-	&.normal {
-		border-radius: 3px;
-		max-width: 400px;
-		.image {
-			width: 130px;
-			height: 130px;
-			left: 10px;
-			top: 10px;
-			-webkit-animation: ge-roll 8s linear infinite;
-			animation: ge-roll 8s linear infinite;
-			-webkit-animation-play-state: paused;
-			animation-play-state: paused;
-			border-radius: 50%;
-			overflow: hidden;
+}
+.ge-player-normal {
+	border-radius: 3px;
+	max-width: 400px;
+	.image {
+		width: 130px;
+		height: 130px;
+		left: 10px;
+		top: 10px;
+		-webkit-animation: ge-roll 8s linear infinite;
+		animation: ge-roll 8s linear infinite;
+		-webkit-animation-play-state: paused;
+		animation-play-state: paused;
+		border-radius: 50%;
+		overflow: hidden;
+	}
+	.ge-roll {
+		-webkit-animation-play-state: running;
+		animation-play-state: running;
+	}
+	.buttons {
+		position: absolute;
+		top: 10px;
+		right: 10px;
+		&>.button {
+			margin-left: 5px;
 		}
-		.ge-roll {
-			-webkit-animation-play-state: running;
-			animation-play-state: running;
+	}
+	.info {
+		padding: 30px 10px 0 150px;
+		text-align: center;
+		height: 70px;
+	}
+	.control {
+		padding: 0 10px 20px 150px;
+		text-align: center;
+		i {
+			margin: 10px;
+			font-size: 30px;
 		}
-		.buttons {
+	}
+	.artist {
+		font-size: .5em;
+		height: 20px;
+	}
+	.lyric {
+		text-align: center;
+		color: brown;
+		font-size: .8em;
+		height: 2em;
+	}
+	.progress{
+		padding: .5em 1em;
+		@cur-color: white;
+		@cur-height: 10px;
+		@cur-width: 10px;
+		.barwrap {
+			padding: (@cur-height - @bar-height) / 2 0;
+		}
+		.cursor{
+			cursor: pointer;
 			position: absolute;
-			top: 10px;
-			right: 10px;
-			&>.button {
-				margin-left: 5px;
-			}
+			border: 1px solid @bar-color;
+			background: @cur-color;
+			border-radius: 50%;
+			width: @cur-width;
+			height: @cur-height;
+			top: 0;
+			margin-left: -@cur-width / 2;
 		}
-		.info {
-			padding: 30px 10px 0 150px;
-			text-align: center;
-			height: 80px;
+		.time{
+			font-size: .7em;
+			position: absolute;
+			right: 0;
+			top: -2em;
 		}
-		.control {
-			padding: 0 10px 10px 150px;
-			text-align: center;
-			i {
-				margin: 10px;
-				font-size: 30px;
-			}
+	}
+	.playlist{
+		max-height: 200px;
+		border-top: 1px dashed gray;
+		padding: .5em 1em;
+		overflow-y: auto;
+		&.hide {
+			display: none;
 		}
-		.artist {
-			font-size: .5em;
-			height: 20px;
-		}
-		.lyric {
-			text-align: center;
-			color: brown;
-			font-size: .8em;
-			height: 2em;
-		}
-		.progress{
-			padding: .5em 1em;
-			@cur-color: white;
-			@cur-height: 10px;
-			@cur-width: 10px;
-			.barwrap {
-				padding: (@cur-height - @bar-height) / 2 0;
+		&>div{
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			color: #1a1a1a;
+			cursor: pointer;
+			&.active{
+				color: dodgerblue;
+				font-weight: bold;
 			}
-			.cursor{
-				cursor: pointer;
-				position: absolute;
-				border: 1px solid @bar-color;
-				background: @cur-color;
-				border-radius: 50%;
-				width: @cur-width;
-				height: @cur-height;
-				top: 0;
-				margin-left: -@cur-width / 2;
-			}
-			.time{
-				font-size: .7em;
-				position: absolute;
-				right: 0;
-				top: -2em;
-			}
-		}
-		.playlist{
-			max-height: 200px;
-			border-top: 1px dashed gray;
-			padding: .5em 1em;
-			overflow-y: auto;
-			&.hide {
-				display: none;
-			}
-			&>div{
-				white-space: nowrap;
-				text-overflow: ellipsis;
-				color: #1a1a1a;
-				cursor: pointer;
-				&.active{
-					color: dodgerblue;
-					font-weight: bold;
-				}
-				&:hover{
-					color: orange;
-					font-weight: bold;
-				}
+			&:hover{
+				color: orange;
+				font-weight: bold;
 			}
 		}
 	}
-	&.simple {
-		border-radius: 2px;
-		max-width: 300px;
-		height: 36px;
-		.image {
-			width: 34px;
-			height: 34px;
+}
+.ge-player-simple {
+	border-radius: 2px;
+	max-width: 300px;
+	height: 36px;
+	.image {
+		width: 34px;
+		height: 34px;
+	}
+	.buttons, .playlist, .lyric {
+		display: none;
+	}
+	.info {
+		position: absolute;
+		top: 0;
+		left: 40px;
+		right: 72px;
+		line-height: 34px;
+		font-size: 10px;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		&>* {
+			margin: 0 5px;
 		}
-		.buttons, .playlist, .lyric {
+	}
+	.control {
+		position: absolute;
+		top: 0;
+		right: 5px;
+		line-height: 34px;
+		&>* {
+			display: inline-block;
+		}
+		i {
+			margin: 0 5px;
+			font-size: 18px;
+		}
+	}
+	.title, .artist {
+		display: inline;
+	}
+	.progress {
+		position: absolute;
+		bottom: 0;
+		width: 100%;
+		.time {
 			display: none;
-		}
-		.info {
-			position: absolute;
-			top: 0;
-			left: 40px;
-			right: 72px;
-			line-height: 34px;
-			font-size: 10px;
-			white-space: nowrap;
-			text-overflow: ellipsis;
-			overflow: hidden;
-			&>* {
-				margin: 0 5px;
-			}
-		}
-		.control {
-			position: absolute;
-			top: 0;
-			right: 5px;
-			line-height: 34px;
-			&>* {
-				display: inline-block;
-			}
-			i {
-				margin: 0 5px;
-				font-size: 18px;
-			}
-		}
-		.title, .artist {
-			display: inline;
-		}
-		.progress {
-			position: absolute;
-			bottom: 0;
-			width: 100%;
-			.time {
-				display: none;
-			}
 		}
 	}
 }
