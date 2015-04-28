@@ -3,9 +3,14 @@
  * @author Gerald <gera2ld@163.com>
  */
 'use strict';
+
+// manage all the players to ensure only one is playing at once
+var players = [];
+
 function Player(options) {
 	this.options = options;
 	this.init();
+	players.push(this);
 }
 Player.prototype = {
 	_classes: {
@@ -15,6 +20,10 @@ Player.prototype = {
 		next: 'fa fa-step-forward',
 		pause: 'fa fa-pause',
 	},
+	themes: [
+		'normal',
+		'simple',
+	],
 	extend: function(dict1, dict2) {
 		for(var i in dict2) dict1[i] = dict2[i];
 		return dict1;
@@ -26,14 +35,19 @@ Player.prototype = {
 		if(self.options.classes)
 			self.extend(self.classes, self.options.classes);
 		container.classList.add('ge-player');
+		var i = self.themes.indexOf(self.options.theme);
+		if(i < 0) i = 0;
+		container.classList.add(self.theme = self.themes[i]);
 		container.innerHTML =
 			'<div class="image"></div>' +
 			'<div class="buttons">' +
 				'<i data="list" class="button ' + self.classes.list + '"></i>' +
 			'</div>' +
-			'<div class="control">' +
+			'<div class="info">' +
 				'<div class="title"></div>' +
 				'<div class="artist"></div>' +
+			'</div>' +
+			'<div class="control">' +
 				'<i data="prev" class="button ' + self.classes.prev + '"></i>' +
 				'<i data="play" class="button ' + self.classes.play + '"></i>' +
 				'<i data="next" class="button ' + self.classes.next + '"></i>' +
@@ -93,12 +107,17 @@ Player.prototype = {
 		});
 		var playStatusChange = function(e) {
 			var status = ['play', 'pause'];
-			if(e.type == 'pause') status.reverse();
+			var i = 0;
+			if(e.type == 'play') {
+				players.forEach(function(player) {
+					if(player !== self) player.audio.pause();
+				});
+			} else i = 1;
 			var playcls = self.btplay.classList;
-			self.classes[status[0]].split(/\s+/).forEach(function(c){
+			self.classes[status[i]].split(/\s+/).forEach(function(c){
 				playcls.remove(c);
 			});
-			self.classes[status[1]].split(/\s+/).forEach(function(c){
+			self.classes[status[1 - i]].split(/\s+/).forEach(function(c){
 				playcls.add(c);
 			});
 			self.image.classList[e.type=='play'?'add':'remove']('ge-roll');
@@ -191,6 +210,7 @@ Player.prototype = {
 	 *   artist: (optional) string
 	 *   duration: (optional) int (seconds)
 	 *   image: (optional) string
+	 *   smallimage: (optional) string
 	 *   lyric: (optional) string
 	 *   lyricjsonp: (optional) string
 	 * }
@@ -259,7 +279,10 @@ Player.prototype = {
 				self.artist.innerHTML = self.safeHTML(song.artist || '');
 				self.audio.src = song.url;
 				self.duration = song.duration ? song.duration / 1000 : null;
-				var image = song.image || self.options.image;
+				var image;
+				if(self.theme == 'simple')
+					image = song.smallimage || self.options.smallimage;
+				image = image || song.image || self.options.image;
 				if(image)
 					self.image.innerHTML = '<img src="' + self.safeHTML(image) + '">';
 				self.lyric.innerHTML = '';
@@ -293,6 +316,9 @@ Player.prototype = {
 		self.audio.src = '';
 		self.audio = null;
 		self.options.container.innerHTML = '';
+		self.options.container.classList.remove('ge-player');
+		var i = players.indexOf(this);
+		if(i >= 0) players.splice(i, 1);
 	},
 };
 window.Player = Player;
