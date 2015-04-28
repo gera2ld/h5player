@@ -224,7 +224,21 @@ Player.prototype = {
 		});
 		self.playlist.innerHTML = data.join('');
 		self.current = -1;
+		self.audio.src = '';
 		self.duration = 0;
+		self.showInfo(self.songs[0]);
+	},
+	showInfo: function(song) {
+		var self = this;
+		var image;
+		song = song || {};
+		if(self.theme == 'simple')
+			image = song.smallimage || self.options.smallimage;
+		image = image || song.image || self.options.image || '';
+		if(image)
+			self.image.innerHTML = '<img src="' + self.safeHTML(image) + '">';
+		self.title.innerHTML = self.safeHTML(song.name || '');
+		self.artist.innerHTML = self.safeHTML(song.artist || '');
 	},
 	getLyric: function(timeout) {
 		var self = this;
@@ -275,16 +289,9 @@ Player.prototype = {
 				self.current = i;
 				children[self.current].classList.add('active');
 				var song = self.songs[self.current];
-				self.title.innerHTML = self.safeHTML(song.name);
-				self.artist.innerHTML = self.safeHTML(song.artist || '');
 				self.audio.src = song.url;
 				self.duration = song.duration ? song.duration / 1000 : null;
-				var image;
-				if(self.theme == 'simple')
-					image = song.smallimage || self.options.smallimage;
-				image = image || song.image || self.options.image;
-				if(image)
-					self.image.innerHTML = '<img src="' + self.safeHTML(image) + '">';
+				self.showInfo(song);
 				self.lyric.innerHTML = '';
 				self.getLyric(10000);
 			}

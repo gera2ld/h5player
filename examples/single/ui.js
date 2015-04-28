@@ -9,6 +9,7 @@
 			player = new Player({
 				container: container,
 				image: 'http://cn.gravatar.com/avatar/a0ad718d86d21262ccd6ff271ece08a3?s=130',
+				theme: 'simple',
 			});
 			var s=document.createElement('script');
 			if(location.search=='?xiami')
