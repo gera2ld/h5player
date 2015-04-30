@@ -292,8 +292,10 @@ Player.prototype = {
 				self.audio.src = song.url;
 				self.duration = song.duration ? song.duration / 1000 : null;
 				self.showInfo(song);
-				self.lyric.innerHTML = '';
-				self.getLyric(10000);
+				if(self.theme!='simple') {
+					self.lyric.innerHTML = '';
+					self.getLyric(10000);
+				}
 			}
 			self.prtime.innerHTML = '';
 			self.prcur.style.left = 0;
