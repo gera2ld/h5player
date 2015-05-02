@@ -105,7 +105,6 @@ EventHandler.prototype = {
 		if(self.touch)
 			self.dataTouch.remove(ele, type, func, useCap);
 	},
-	ignore: function(){},
 	forEach: function(arr, callback) {
 		Array.prototype.forEach.call(arr, callback);
 	},
@@ -116,12 +115,16 @@ EventHandler.prototype = {
 			if(callbacks) self.forEach(callbacks, function(func) {
 				var evt = {type: type}, i;
 				for(i in e) evt[i] = e[i];
-				evt.preventDefault = self.ignore;
+				evt.preventDefault = preventDefault;
 				evt.stopPropagation = stopPropagation;
 				func.call(target, evt);
 			});
 		};
+		var defaultPrevented = false;
 		var propagationStopped = false;
+		var preventDefault = function() {
+			defaultPrevented = true;
+		};
 		var stopPropagation = function() {
 			propagationStopped = true;
 		};
@@ -131,14 +134,15 @@ EventHandler.prototype = {
 			if(propagationStopped || target === self.parent) break;
 			target = target.parentNode;
 		}
+		return defaultPrevented;
 	},
 	touchHandler: function(e) {
 		var self = this;
-		e.preventDefault();
+		var defaultPrevented = false;
 		if(e.type == 'touchstart')
 			self.forEach(e.changedTouches, function(e) {
 				self.touches[e.identifier] = {evt: e};
-				self.fire('mousedown', e);
+				defaultPrevented = self.fire('mousedown', e) || defaultPrevented;
 			});
 		else if(e.type == 'touchmove')
 			self.forEach(e.changedTouches, function(e) {
@@ -150,17 +154,18 @@ EventHandler.prototype = {
 				);
 				if(touch.moved) {
 					touch.evt = e;
-					self.fire('mousemove', e);
+					defaultPrevented = self.fire('mousemove', e) || defaultPrevented;
 				}
 			});
 		else if(e.type == 'touchend')
 			self.forEach(e.changedTouches, function(e) {
-				self.fire('mouseup',e);
+				defaultPrevented = self.fire('mouseup',e) || defaultPrevented;
 				var touch = self.touches[e.identifier];
 				delete self.touches[e.identifier];
 				if(touch && !touch.moved)
-					self.fire('click', e);
+					defaultPrevented = self.fire('click', e) || defaultPrevented;
 			});
+		if(defaultPrevented) e.preventDefault();
 	},
 	getPoint: function(e) {
 		if('offsetX' in e) return {

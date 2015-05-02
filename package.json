@@ -1,7 +1,8 @@
 {
   "name": "h5player",
-  "version": "1.0.0",
-  "description": "HTML5 player",
+  "version": "1.1.1",
+  "title": "H5Player",
+  "description": "A simple but powerful HTML5 music player",
   "main": "player.js",
   "repository": {
     "type": "git",
@@ -13,6 +14,7 @@
     "gulp": "^3.8.11",
     "gulp-concat": "^2.5.2",
     "gulp-css2js": "^1.0.2",
+    "gulp-header": "^1.2.2",
     "gulp-less": "^3.0.2",
     "gulp-merge": "^0.1.0",
     "gulp-minify-css": "^1.0.0",

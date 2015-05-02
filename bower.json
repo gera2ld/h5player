@@ -1,10 +1,10 @@
 {
   "name": "h5player",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "authors": [
     "Gerald <gera2ld@163.com>"
   ],
-  "description": "HTML5 music player",
+  "description": "A simple but powerful HTML5 music player",
   "main": "dist/player-with-css.min.js",
   "moduleType": [
     "globals"
