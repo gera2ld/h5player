@@ -125,6 +125,7 @@ Player.prototype = {
 		evtHandler.on(self.audio, 'play', playStatusChange);
 		evtHandler.on(self.audio, 'pause', playStatusChange);
 		evtHandler.delegate(self.playlist, 'click', function(e) {
+			e.preventDefault();
 			var i = Array.prototype.indexOf.call(this.childNodes, e.target);
 			if(i >= 0) self.play(i);
 		});
@@ -178,12 +179,14 @@ Player.prototype = {
 			}[m];
 		});
 	},
-	toggleList: function() {
+	toggleList: function(e) {
+		e.preventDefault();
 		var self = this;
 		self.btlist.classList.toggle('active');
 		self.playlist.classList.toggle('hide');
 	},
-	togglePlay: function() {
+	togglePlay: function(e) {
+		e.preventDefault();
 		var self = this;
 		if(self.current < 0)
 			self.play(0);
@@ -192,10 +195,12 @@ Player.prototype = {
 		else
 			self.audio.pause();
 	},
-	playPrev: function() {
+	playPrev: function(e) {
+		if(e) e.preventDefault();
 		this.play(this.previous());
 	},
-	playNext: function() {
+	playNext: function(e) {
+		if(e) e.preventDefault();
 		this.play(this.next());
 	},
 	playAnother: function() {

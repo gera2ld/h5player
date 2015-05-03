@@ -1,6 +1,6 @@
 {
   "name": "h5player",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "title": "H5Player",
   "description": "A simple but powerful HTML5 music player",
   "main": "player.js",

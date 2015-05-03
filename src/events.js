@@ -67,43 +67,43 @@ Events.prototype = {
 function EventHandler(parent) {
 	var self = this;
 	self.parent = parent;
-	self.dataEvent = new Events();
+	self.events = new Events();
+	self.delegates = new Events();
+	self.handler = self._handler.bind(self);
 	if('ontouchstart' in window) self.initTouch();
-	else if('onmousedown' in window) self.mouse = true;
+	if('onmousedown' in window) self.initMouse();
 };
 EventHandler.prototype = {
 	threshold: 5,
 	initTouch: function() {
 		var self = this;
-		var touch = self.touchHandler.bind(self);
-		self.touch = true;
-		self.dataTouch = new Events();
-		self.on(self.parent, 'touchstart', touch);
-		self.on(self.parent, 'touchmove', touch);
-		self.on(self.parent, 'touchend', touch);
+		var handler = self.handler;
 		self.touches={};	// {identifier:{moved,target}}
+		self.on(self.parent, 'touchstart', handler);
+		self.on(self.parent, 'touchmove', handler);
+		self.on(self.parent, 'touchend', handler);
+	},
+	initMouse: function() {
+		var self = this;
+		var handler = self.handler;
+		self.mouse = {};	// {moving:false,moved:false}
+		self.on(self.parent, 'mousedown', handler);
+		self.on(self.parent, 'mousemove', handler);
+		self.on(self.parent, 'mouseup', handler);
 	},
 	on: function(ele, type, func, useCap) {
-		this.dataEvent.add(ele, type, func, useCap);
+		this.events.add(ele, type, func, useCap);
 		ele.addEventListener(type, func, useCap);
 	},
 	off: function(ele, type, func, useCap) {
-		this.dataEvent.remove(ele, type, func, useCap);
+		this.events.remove(ele, type, func, useCap);
 		ele.removeEventListener(type, func, useCap);
 	},
 	delegate: function(ele, type, func, useCap) {
-		var self = this;
-		if(self.mouse)
-			self.on(ele, type, func, useCap);
-		if(self.touch)
-			self.dataTouch.add(ele, type, func, useCap);
+		this.delegates.add(ele, type, func, useCap);
 	},
 	undelegate: function(ele, type, func, useCap) {
-		var self = this;
-		if(self.mouse)
-			self.off(ele, type, func, useCap);
-		if(self.touch)
-			self.dataTouch.remove(ele, type, func, useCap);
+		this.delegates.remove(ele, type, func, useCap);
 	},
 	forEach: function(arr, callback) {
 		Array.prototype.forEach.call(arr, callback);
@@ -111,7 +111,7 @@ EventHandler.prototype = {
 	fire: function(type, e) {
 		var self = this;
 		var callTarget = function(target) {
-			var callbacks = self.dataTouch.getCallbacks(target, type);
+			var callbacks = self.delegates.getCallbacks(target, type);
 			if(callbacks) self.forEach(callbacks, function(func) {
 				var evt = {type: type}, i;
 				for(i in e) evt[i] = e[i];
@@ -136,17 +136,19 @@ EventHandler.prototype = {
 		}
 		return defaultPrevented;
 	},
-	touchHandler: function(e) {
+	_handler: function(e) {
 		var self = this;
+		var touches = self.touches;
+		var mouse = self.mouse;
 		var defaultPrevented = false;
 		if(e.type == 'touchstart')
 			self.forEach(e.changedTouches, function(e) {
-				self.touches[e.identifier] = {evt: e};
+				touches[e.identifier] = {evt: e};
 				defaultPrevented = self.fire('mousedown', e) || defaultPrevented;
 			});
 		else if(e.type == 'touchmove')
 			self.forEach(e.changedTouches, function(e) {
-				var touch = self.touches[e.identifier];
+				var touch = touches[e.identifier];
 				var old = touch.evt;
 				touch.moved = touch.moved || (
 					Math.abs(e.clientX - old.clientX) > self.threshold ||
@@ -160,11 +162,26 @@ EventHandler.prototype = {
 		else if(e.type == 'touchend')
 			self.forEach(e.changedTouches, function(e) {
 				defaultPrevented = self.fire('mouseup',e) || defaultPrevented;
-				var touch = self.touches[e.identifier];
-				delete self.touches[e.identifier];
+				var touch = touches[e.identifier];
+				delete touches[e.identifier];
 				if(touch && !touch.moved)
 					defaultPrevented = self.fire('click', e) || defaultPrevented;
 			});
+		else if(e.type == 'mousedown') {
+			mouse.moving = true;
+			mouse.moved = false;
+			defaultPrevented = self.fire('mousedown', e) || defaultPrevented;
+		} else if(e.type == 'mousemove') {
+			if(mouse.moving) {
+				mouse.moved = true;
+				defaultPrevented = self.fire('mousemove', e) || defaultPrevented;
+			}
+		} else if(e.type == 'mouseup') {
+			mouse.moving = false;
+			defaultPrevented = self.fire('mouseup', e) || defaultPrevented;
+			if(!mouse.moved)
+				defaultPrevented = self.fire('click', e) || defaultPrevented;
+		}
 		if(defaultPrevented) e.preventDefault();
 	},
 	getPoint: function(e) {
@@ -182,10 +199,10 @@ EventHandler.prototype = {
 	},
 	destroy: function() {
 		var self = this;
-		self.dataEvent.forEachEvent(function(element, type, func, useCap) {
+		self.events.forEachEvent(function(element, type, func, useCap) {
 			element.removeEventListener(type, func, useCap);
 		});
-		self.dataTouch = null;
-		self.dataEvent = null;
+		self.delegates = null;
+		self.events = null;
 	},
 };
