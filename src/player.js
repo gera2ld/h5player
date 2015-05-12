@@ -34,47 +34,47 @@ Player.prototype = {
 		self.classes = self.extend({}, self._classes);
 		if(self.options.classes)
 			self.extend(self.classes, self.options.classes);
-		container.classList.add('ge-player');
+		container.classList.add('h5p');
 		var i = self.themes.indexOf(self.options.theme);
 		if(i < 0) i = 0;
-		container.classList.add('ge-player-' + (self.theme = self.themes[i]));
+		container.classList.add('h5p-' + (self.theme = self.themes[i]));
 		container.innerHTML =
-			'<div class="image"></div>' +
-			'<div class="buttons">' +
-				'<i data="list" class="button ' + self.classes.list + '"></i>' +
+			'<div class="h5p-image"></div>' +
+			'<div class="h5p-buttons">' +
+				'<i data="list" class="h5p-button ' + self.classes.list + '"></i>' +
 			'</div>' +
-			'<div class="info">' +
-				'<div class="title"></div>' +
-				'<div class="artist"></div>' +
+			'<div class="h5p-info">' +
+				'<div class="h5p-title"></div>' +
+				'<div class="h5p-artist"></div>' +
 			'</div>' +
-			'<div class="control">' +
-				'<i data="prev" class="button ' + self.classes.prev + '"></i>' +
-				'<i data="play" class="button ' + self.classes.play + '"></i>' +
-				'<i data="next" class="button ' + self.classes.next + '"></i>' +
+			'<div class="h5p-control">' +
+				'<i data="prev" class="h5p-button ' + self.classes.prev + '"></i>' +
+				'<i data="play" class="h5p-button ' + self.classes.play + '"></i>' +
+				'<i data="next" class="h5p-button ' + self.classes.next + '"></i>' +
 			'</div>' +
-			'<div class="progress">' +
-				'<div class="wrap">' +
-					'<div class="barwrap">' +
-						'<div class="bar"><div class="played"></div></div>' +
+			'<div class="h5p-progress">' +
+				'<div class="h5p-wrap">' +
+					'<div class="h5p-bar">' +
+						'<div class="h5p-played"></div>' +
 					'</div>' +
-					'<div class="cursor"></div>' +
-					'<div class="time"></div>' +
+					'<div class="h5p-cursor"></div>' +
+					'<div class="h5p-time"></div>' +
 				'</div>' +
 			'</div>' +
-			'<div class="lyric"></div>' +
-			'<div class="playlist hide"></div>'
+			'<div class="h5p-lyric"></div>' +
+			'<div class="h5p-playlist"></div>'
 		;
 		var $ = container.querySelector.bind(container);
-		self.image = $('.image');
-		self.title = $('.title');
-		self.artist = $('.artist');
-		self.playlist = $('.playlist');
-		self.prwrap = $('.barwrap');
-		self.prcur = $('.cursor');
-		self.prtime = $('.time');
-		self.brplayed = $('.played');
-		self.lyric = $('.lyric');
-		Array.prototype.forEach.call(container.querySelectorAll('.button[data]'), function(bt){
+		self.image = $('.h5p-image');
+		self.title = $('.h5p-title');
+		self.artist = $('.h5p-artist');
+		self.playlist = $('.h5p-playlist');
+		self.prwrap = $('.h5p-wrap');
+		self.prcur = $('.h5p-cursor');
+		self.prtime = $('.h5p-time');
+		self.brplayed = $('.h5p-played');
+		self.lyric = $('.h5p-lyric');
+		Array.prototype.forEach.call(container.querySelectorAll('.h5p-button'), function(bt){
 			self['bt' + bt.getAttribute('data')] = bt;
 		});
 		self.audio = new Audio;
@@ -120,7 +120,7 @@ Player.prototype = {
 			self.classes[status[1 - i]].split(/\s+/).forEach(function(c){
 				playcls.add(c);
 			});
-			self.image.classList[e.type=='play'?'add':'remove']('ge-roll');
+			self.image.classList[e.type=='play'?'add':'remove']('h5p-roll');
 		};
 		evtHandler.on(self.audio, 'play', playStatusChange);
 		evtHandler.on(self.audio, 'pause', playStatusChange);
@@ -182,8 +182,9 @@ Player.prototype = {
 	toggleList: function(e) {
 		e.preventDefault();
 		var self = this;
-		self.btlist.classList.toggle('active');
-		self.playlist.classList.toggle('hide');
+		self.btlist.classList.toggle('h5p-active');
+		var display = self.playlist.style.display;
+		self.playlist.style.display = display ? '' : 'block';
 	},
 	togglePlay: function(e) {
 		e.preventDefault();
@@ -290,9 +291,9 @@ Player.prototype = {
 			} else {
 				var children = self.playlist.childNodes;
 				var last = children[self.current];
-				if(last) last.classList.remove('active');
+				if(last) last.classList.remove('h5p-active');
 				self.current = i;
-				children[self.current].classList.add('active');
+				children[self.current].classList.add('h5p-active');
 				var song = self.songs[self.current];
 				self.audio.src = song.url;
 				self.duration = song.duration ? song.duration / 1000 : null;
@@ -330,7 +331,7 @@ Player.prototype = {
 		self.audio.src = '';
 		self.audio = null;
 		self.options.container.innerHTML = '';
-		self.options.container.classList.remove('ge-player');
+		self.options.container.classList.remove('h5p');
 		var i = players.indexOf(this);
 		if(i >= 0) players.splice(i, 1);
 	},
