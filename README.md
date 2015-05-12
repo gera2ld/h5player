@@ -1,6 +1,11 @@
 HTML5 Player
 ===
 
+Features
+---
+This branch is using `requestAnimationFrame` to control the image rotating
+so that it can pause on browsers which does not support `animation-play-state`.
+
 Usage
 ---
 ``` html
@@ -38,7 +43,7 @@ player.play(0);
 </script>
 ```
 
-Examples
+Demos
 ---
 <http://gerald.top/code/h5player>
 
