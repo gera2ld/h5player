@@ -79,13 +79,16 @@ Player.prototype = {
 		});
 		self.audio = new Audio;
 		if(self.options.image)
-					self.image.innerHTML = '<img src="' + self.safeHTML(self.options.image) + '">';
+			self.image.innerHTML = '<img src="' + self.safeHTML(self.options.image) + '">';
 		self.setSongs([]);
 		self.lyricParser = new LyricParser();
 		self.bindEvents();
 	},
 	prevent: function(e) {
-		if(e && e.preventDefault) e.preventDefault();
+		if(e && e.preventDefault) {
+			e.preventDefault();
+			e.stopPropagation();
+		}
 	},
 	touch: function(cb) {
 		var self = this;
@@ -164,11 +167,13 @@ Player.prototype = {
 			self.prcur.style.left = self.brplayed.style.width = newPos * 100 + '%';
 			if(play) self.audio.currentTime = ~~ (newPos * self.duration);
 		};
-		self.prwrap.addEventListener('click', function(e) {
+		var barClick = function(e) {
 			self.prevent(e);
 			var x = self.getPoint(e).x;
 			setCursor(x, true);
-		}, false);
+		};
+		self.prwrap.addEventListener('touchstart', self.touch(barClick), false);
+		self.prwrap.addEventListener('click', barClick, false);
 		var movingCursor = function(e) {
 			self.prevent(e);
 			cursorData.moved = true;
@@ -204,10 +209,8 @@ Player.prototype = {
 		};
 		self.prcur.addEventListener('touchstart', self.touch(startMovingCursor), false);
 		self.prcur.addEventListener('mousedown', startMovingCursor, false);
-		self.prcur.addEventListener('click', function(e) {
-			// to stop click event on the progress bar
-			e.stopPropagation();
-		}, false);
+		// to stop click event on the progress bar
+		self.prcur.addEventListener('click', self.prevent, false);
 	},
 	safeHTML: function(html) {
 		return html.replace(/[&"<]/g, function(m) {
