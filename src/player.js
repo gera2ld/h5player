@@ -191,14 +191,16 @@ Player.prototype = {
 		var touchEndMovingCursor = self.touch(endMovingCursor);
 		var startMovingCursor = function(e) {
 			self.prevent(e);
-			cursorData = {
-				delta: e.clientX - self.brplayed.offsetWidth,
-			};
-			var container = self.options.container;
-			container.addEventListener('touchmove', touchMovingCursor, false);
-			container.addEventListener('mousemove', movingCursor, false);
-			container.addEventListener('touchend', touchEndMovingCursor, false);
-			container.addEventListener('mouseup', endMovingCursor, false);
+			if(!cursorData) {
+				cursorData = {
+					delta: e.clientX - self.brplayed.offsetWidth,
+				};
+				var container = self.options.container;
+				container.addEventListener('touchmove', touchMovingCursor, false);
+				container.addEventListener('mousemove', movingCursor, false);
+				container.addEventListener('touchend', touchEndMovingCursor, false);
+				container.addEventListener('mouseup', endMovingCursor, false);
+			}
 		};
 		self.prcur.addEventListener('touchstart', self.touch(startMovingCursor), false);
 		self.prcur.addEventListener('mousedown', startMovingCursor, false);
