@@ -2,6 +2,11 @@ HTML5 Player
 ===
 ![Bower](https://img.shields.io/bower/v/h5player.svg)
 
+Features
+---
+This branch is using an event handler that support both touch and mouse events.
+In that case all delegated events will be fired by the event handler and the touch events will be mapped into mouse events.
+
 Installation
 ---
 ``` sh
@@ -88,7 +93,7 @@ The `Player` object has following methods:
 * play(*int* index)  
   start playing the *index*-th song.
 
-Cases
+Demos
 ---
 * <http://gerald.top/code/h5player>
 
