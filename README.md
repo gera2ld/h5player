@@ -88,7 +88,7 @@ The `Player` object has following methods:
 * play(*int* index)  
   start playing the *index*-th song.
 
-Cases
+Demos
 ---
 * <http://gerald.top/code/h5player>
 
