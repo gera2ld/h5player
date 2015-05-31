@@ -6,6 +6,23 @@
 
 // manage all the players to ensure only one is playing at once
 var players = [];
+var currentPlayer = null;
+
+function fireEvent(data) {
+	var event = new CustomEvent('PlayerEvent', {
+		detail: data,
+		bubbles: true,
+		cancelable: true,
+	});
+	document.dispatchEvent(event);
+}
+
+function setCurrentPlayer(player) {
+	currentPlayer = player;
+	players.forEach(function(other) {
+		if(player !== other) other.audio.pause();
+	});
+}
 
 function Player(options) {
 	this.options = options;
@@ -41,19 +58,19 @@ Player.prototype = {
 		container.innerHTML =
 			'<div class="h5p-image"></div>' +
 			'<div class="h5p-buttons">' +
-				'<i data="list" class="h5p-button ' + self.classes.list + '"></i>' +
+				'<i data-id="list" class="h5p-button ' + self.classes.list + '"></i>' +
 			'</div>' +
 			'<div class="h5p-info">' +
 				'<div class="h5p-title"></div>' +
 				'<div class="h5p-artist"></div>' +
 			'</div>' +
 			'<div class="h5p-control">' +
-				'<i data="prev" class="h5p-button ' + self.classes.prev + '"></i>' +
-				'<i data="play" class="h5p-button ' + self.classes.play + '"></i>' +
-				'<i data="next" class="h5p-button ' + self.classes.next + '"></i>' +
+				'<i data-id="prev" class="h5p-button ' + self.classes.prev + '"></i>' +
+				'<i data-id="play" class="h5p-button ' + self.classes.play + '"></i>' +
+				'<i data-id="next" class="h5p-button ' + self.classes.next + '"></i>' +
 			'</div>' +
 			'<div class="h5p-progress">' +
-				'<div class="h5p-wrap">' +
+				'<div data-id="bar" class="h5p-wrap">' +
 					'<div class="h5p-bar">' +
 						'<div class="h5p-played"></div>' +
 					'</div>' +
@@ -69,13 +86,13 @@ Player.prototype = {
 		self.title = $('.h5p-title');
 		self.artist = $('.h5p-artist');
 		self.playlist = $('.h5p-playlist');
-		self.prwrap = $('.h5p-wrap');
 		self.prcur = $('.h5p-cursor');
 		self.prtime = $('.h5p-time');
 		self.brplayed = $('.h5p-played');
 		self.lyric = $('.h5p-lyric');
-		Array.prototype.forEach.call(container.querySelectorAll('.h5p-button'), function(bt){
-			self['bt' + bt.getAttribute('data')] = bt;
+		self.items = {};
+		[].forEach.call(container.querySelectorAll('[data-id]'), function(item){
+			self.items[item.dataset.id] = item;
 		});
 		self.audio = new Audio;
 		if(self.options.image)
@@ -83,21 +100,6 @@ Player.prototype = {
 		self.setSongs([]);
 		self.lyricParser = new LyricParser();
 		self.bindEvents();
-	},
-	prevent: function(e) {
-		if(e && e.preventDefault) {
-			e.preventDefault();
-			e.stopPropagation();
-		}
-	},
-	touch: function(cb) {
-		var self = this;
-		return function(e) {
-			self.prevent(e);
-			[].forEach.call(e.changedTouches, function(e) {
-				cb.call(self, e);
-			});
-		};
 	},
 	getPoint: function(e) {
 		if('offsetX' in e) return {
@@ -115,14 +117,49 @@ Player.prototype = {
 	bindEvents: function() {
 		var self = this;
 		var cursorData = null;
-		self.btlist.addEventListener('touchstart', self.touch(self.toggleList), false);
-		self.btlist.addEventListener('click', self.toggleList.bind(self), false);
-		self.btprev.addEventListener('touchstart', self.touch(self.playPrev), false);
-		self.btprev.addEventListener('click', self.playPrev.bind(self), false);
-		self.btnext.addEventListener('touchstart', self.touch(self.playNext), false);
-		self.btnext.addEventListener('click', self.playNext.bind(self), false);
-		self.btplay.addEventListener('touchstart', self.touch(self.togglePlay), false);
-		self.btplay.addEventListener('click', self.togglePlay.bind(self), false);
+		var container = self.options.container;
+		var clickEvents = {
+			list: self.toggleList,
+			prev: self.playPrev,
+			next: self.playNext,
+			play: self.togglePlay,
+			bar: function(e) {
+				setCursor(self.getPoint(e).x, true);
+			},
+		};
+		var prevent = function(e) {
+			if(e && e.preventDefault) {
+				e.preventDefault();
+				e.stopPropagation();
+			}
+		};
+		var touch = function(func) {
+			return function(e) {
+				prevent(e);
+				[].forEach.call(e.changedTouches, function(e) {
+					func.call(self, e);
+				});
+			};
+		};
+		var eventHandler = function(e) {
+			var target = e.target;
+			var id;
+			while(1) {
+				id = target.dataset.id;
+				if (id || target === container) break;
+				target = target.parentNode;
+			}
+			var func = id && clickEvents[id];
+			if (func) {
+				if (e.type == 'click') {
+					prevent(e);
+					func.call(self, e);
+				} else
+					touch(func)(e);
+			}
+		};
+		container.addEventListener('touchstart', eventHandler, false);
+		container.addEventListener('click', eventHandler, false);
 		self.audio.addEventListener('ended', self.playAnother.bind(self), false);
 		self.audio.addEventListener('timeupdate', function(e) {
 			var currentTime = this.currentTime;
@@ -136,15 +173,26 @@ Player.prototype = {
 			self.prtime.innerHTML = self.timestr(currentTime) + ' / ' + self.timestr(duration);
 			self.lyric.innerHTML = self.safeHTML(self.lyricParser.getLyricAtTime(currentTime));
 		}, false);
+		var fire = function(type) {
+			fireEvent({
+				type: type,
+				player: self,
+			});
+		};
 		var playStatusChange = function(e) {
 			var status = ['play', 'pause'];
 			var i = 0;
 			if(e.type == 'play') {
-				players.forEach(function(player) {
-					if(player !== self) player.audio.pause();
-				});
-			} else i = 1;
-			var playcls = self.btplay.classList;
+				setCurrentPlayer(self);
+				fire(e.type);
+			} else {
+				i = 1;
+				if (currentPlayer === self) {
+					fire(e.type);
+					currentPlayer = null;
+				}
+			}
+			var playcls = self.items.play.classList;
 			self.classes[status[i]].split(/\s+/).forEach(function(c){
 				playcls.remove(c);
 			});
@@ -156,34 +204,26 @@ Player.prototype = {
 		self.audio.addEventListener('play', playStatusChange, false);
 		self.audio.addEventListener('pause', playStatusChange, false);
 		self.playlist.addEventListener('click', function(e) {
-			self.prevent(e);
-			var i = Array.prototype.indexOf.call(this.childNodes, e.target);
+			prevent(e);
+			var i = [].indexOf.call(this.childNodes, e.target);
 			if(i >= 0) self.play(i);
 		}, false);
 		var setCursor = function(x, play) {
-			var newPos = x / self.prwrap.offsetWidth;
+			var newPos = x / self.items.bar.offsetWidth;
 			if(newPos < 0) newPos = 0;
 			else if(newPos > 1) newPos = 1;
 			self.prcur.style.left = self.brplayed.style.width = newPos * 100 + '%';
 			if(play) self.audio.currentTime = ~~ (newPos * self.duration);
 		};
-		var barClick = function(e) {
-			self.prevent(e);
-			var x = self.getPoint(e).x;
-			setCursor(x, true);
-		};
-		self.prwrap.addEventListener('touchstart', self.touch(barClick), false);
-		self.prwrap.addEventListener('click', barClick, false);
 		var movingCursor = function(e) {
-			self.prevent(e);
+			prevent(e);
 			cursorData.moved = true;
 			setCursor(e.clientX - cursorData.delta);
 		};
-		var touchMovingCursor = self.touch(movingCursor);
+		var touchMovingCursor = touch(movingCursor);
 		var stopMovingCursor = function(e) {
-			self.prevent(e);
+			prevent(e);
 			cursorData = null;
-			var container = self.options.container;
 			container.removeEventListener('touchmove', touchMovingCursor, false);
 			container.removeEventListener('mousemove', movingCursor, false);
 			container.removeEventListener('touchend', touchEndMovingCursor, false);
@@ -193,24 +233,23 @@ Player.prototype = {
 			setCursor(e.clientX - cursorData.delta, true);
 			stopMovingCursor(e);
 		};
-		var touchEndMovingCursor = self.touch(endMovingCursor);
+		var touchEndMovingCursor = touch(endMovingCursor);
 		var startMovingCursor = function(e) {
-			self.prevent(e);
+			prevent(e);
 			if(!cursorData) {
 				cursorData = {
 					delta: e.clientX - self.brplayed.offsetWidth,
 				};
-				var container = self.options.container;
 				container.addEventListener('touchmove', touchMovingCursor, false);
 				container.addEventListener('mousemove', movingCursor, false);
 				container.addEventListener('touchend', touchEndMovingCursor, false);
 				container.addEventListener('mouseup', endMovingCursor, false);
 			}
 		};
-		self.prcur.addEventListener('touchstart', self.touch(startMovingCursor), false);
+		self.prcur.addEventListener('touchstart', touch(startMovingCursor), false);
 		self.prcur.addEventListener('mousedown', startMovingCursor, false);
 		// to stop click event on the progress bar
-		self.prcur.addEventListener('click', self.prevent, false);
+		self.prcur.addEventListener('click', prevent, false);
 	},
 	safeHTML: function(html) {
 		return html.replace(/[&"<]/g, function(m) {
@@ -223,14 +262,12 @@ Player.prototype = {
 	},
 	toggleList: function(e) {
 		var self = this;
-		self.prevent(e);
-		self.btlist.classList.toggle('h5p-active');
+		self.items.list.classList.toggle('h5p-active');
 		var display = self.playlist.style.display;
 		self.playlist.style.display = display ? '' : 'block';
 	},
 	togglePlay: function(e) {
 		var self = this;
-		self.prevent(e);
 		if(self.current < 0)
 			self.play(0);
 		else if(self.audio.paused)
@@ -239,11 +276,9 @@ Player.prototype = {
 			self.audio.pause();
 	},
 	playPrev: function(e) {
-		this.prevent(e);
 		this.play(this.previous());
 	},
 	playNext: function(e) {
-		this.prevent(e);
 		this.play(this.next());
 	},
 	playAnother: function() {

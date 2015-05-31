@@ -13,6 +13,16 @@
 	};
 	var players = document.getElementById('players');
 	var s=document.createElement('script');
+
+	// custom events
+	document.addEventListener('PlayerEvent', function(e) {
+		var detail = e.detail, title = '';
+		if (detail.type == 'play')
+			title = detail.player.songs[detail.player.current].name + ' - ';
+		title += 'Music Player';
+		document.title = title;
+	}, false);
+
 	if(location.search=='?xiami')
 		s.src='http://wsgi.oschina.mopaas.com/music/xiami/songs/1774005550?jsonp=init';
 	else

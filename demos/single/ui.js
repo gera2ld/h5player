@@ -22,6 +22,16 @@
 	var player = null;
 	var container = document.getElementById('player');
 	var btLoad = document.getElementById('load');
+
+	// custom events
+	document.addEventListener('PlayerEvent', function(e) {
+		var detail = e.detail, title = '';
+		if (detail.type == 'play')
+			title = detail.player.songs[detail.player.current].name + ' - ';
+		title += 'Music Player';
+		document.title = title;
+	}, false);
+
 	window.init = function(songs) {
 		player.setSongs(songs);
 		player.play(0);

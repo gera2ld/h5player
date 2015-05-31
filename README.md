@@ -88,6 +88,14 @@ The `Player` object has following methods:
 * play(*int* index)  
   start playing the *index*-th song.
 
+When the play status is changed, a `PlayerEvent` will be fired with its `detail` set to an object with following attributes:
+
+* player  
+  the `Player` object that is related to this event
+
+* type  
+  `play` or `pause`
+
 Demos
 ---
 * <http://gerald.top/code/h5player>
