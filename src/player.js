@@ -362,29 +362,30 @@ Player.prototype = {
 	},
 	play: function(i) {
 		var self = this;
-		if(i >= 0 && i < self.songs.length) {
-			if(self.current == i) {
-				self.audio.currentTime = 0;
-			} else {
-				var children = self.playlist.childNodes;
-				var last = children[self.current];
-				if(last) last.classList.remove('h5p-active');
-				self.current = i;
-				children[self.current].classList.add('h5p-active');
-				var song = self.songs[self.current];
-				self.audio.src = song.url;
-				self.duration = song.duration ? song.duration / 1000 : null;
-				self.showInfo(song);
-				if(self.theme!='simple') {
-					self.lyric.innerHTML = '';
-					self.getLyric(10000);
-				}
+		var song = self.songs[Number(i)];
+		if (!song)
+			song = self.songs[i = 0];
+		if (!song) return;
+		if(self.current == i) {
+			self.audio.currentTime = 0;
+		} else {
+			var children = self.playlist.childNodes;
+			var last = children[self.current];
+			if(last) last.classList.remove('h5p-active');
+			self.current = i;
+			children[i].classList.add('h5p-active');
+			self.audio.src = song.url;
+			self.duration = song.duration ? song.duration / 1000 : null;
+			self.showInfo(song);
+			if(self.theme!='simple') {
+				self.lyric.innerHTML = '';
+				self.getLyric(10000);
 			}
-			self.prtime.innerHTML = '';
-			self.prcur.style.left = 0;
-			self.brplayed.style.width = 0;
-			self.audio.play();
 		}
+		self.prtime.innerHTML = '';
+		self.prcur.style.left = 0;
+		self.brplayed.style.width = 0;
+		self.audio.play();
 	},
 	previous: function() {
 		return (this.current + this.songs.length - 1) % this.songs.length;
