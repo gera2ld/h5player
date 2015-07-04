@@ -16,6 +16,10 @@ function fireEvent(data) {
 	});
 	document.dispatchEvent(event);
 }
+function extend(dict1, dict2) {
+  for(var i in dict2) dict1[i] = dict2[i];
+  return dict1;
+}
 
 function setCurrentPlayer(player) {
 	currentPlayer = player;
@@ -41,33 +45,26 @@ Player.prototype = {
 		'normal',
 		'simple',
 	],
-	extend: function(dict1, dict2) {
-		for(var i in dict2) dict1[i] = dict2[i];
-		return dict1;
-	},
 	init: function() {
-		var self = this;
-		var container = self.options.container;
-		self.classes = self.extend({}, self._classes);
-		if(self.options.classes)
-			self.extend(self.classes, self.options.classes);
+		var _this = this;
+		var container = _this.options.container;
+		_this.classes = extend({}, _this._classes);
+		if(_this.options.classes)
+			extend(_this.classes, _this.options.classes);
 		container.classList.add('h5p');
-		var i = self.themes.indexOf(self.options.theme);
-		if(i < 0) i = 0;
-		container.classList.add('h5p-' + (self.theme = self.themes[i]));
 		container.innerHTML =
 			'<div class="h5p-image"></div>' +
 			'<div class="h5p-buttons">' +
-				'<i data-id="list" class="h5p-button ' + self.classes.list + '"></i>' +
+				'<i data-id="list" class="h5p-button ' + _this.classes.list + '"></i>' +
 			'</div>' +
 			'<div class="h5p-info">' +
 				'<div class="h5p-title"></div>' +
 				'<div class="h5p-artist"></div>' +
 			'</div>' +
 			'<div class="h5p-control">' +
-				'<i data-id="prev" class="h5p-button ' + self.classes.prev + '"></i>' +
-				'<i data-id="play" class="h5p-button ' + self.classes.play + '"></i>' +
-				'<i data-id="next" class="h5p-button ' + self.classes.next + '"></i>' +
+				'<i data-id="prev" class="h5p-button ' + _this.classes.prev + '"></i>' +
+				'<i data-id="play" class="h5p-button ' + _this.classes.play + '"></i>' +
+				'<i data-id="next" class="h5p-button ' + _this.classes.next + '"></i>' +
 			'</div>' +
 			'<div class="h5p-progress">' +
 				'<div data-id="bar" class="h5p-wrap">' +
@@ -82,24 +79,23 @@ Player.prototype = {
 			'<div class="h5p-playlist"></div>'
 		;
 		var $ = container.querySelector.bind(container);
-		self.image = $('.h5p-image');
-		self.title = $('.h5p-title');
-		self.artist = $('.h5p-artist');
-		self.playlist = $('.h5p-playlist');
-		self.prcur = $('.h5p-cursor');
-		self.prtime = $('.h5p-time');
-		self.brplayed = $('.h5p-played');
-		self.lyric = $('.h5p-lyric');
-		self.items = {};
+		_this.image = $('.h5p-image');
+		_this.title = $('.h5p-title');
+		_this.artist = $('.h5p-artist');
+		_this.playlist = $('.h5p-playlist');
+		_this.prcur = $('.h5p-cursor');
+		_this.prtime = $('.h5p-time');
+		_this.brplayed = $('.h5p-played');
+		_this.lyric = $('.h5p-lyric');
+		_this.items = {};
 		[].forEach.call(container.querySelectorAll('[data-id]'), function(item){
-			self.items[item.dataset.id] = item;
+			_this.items[item.dataset.id] = item;
 		});
-		self.audio = new Audio;
-		if(self.options.image)
-			self.image.innerHTML = '<img src="' + self.safeHTML(self.options.image) + '">';
-		self.setSongs([]);
-		self.lyricParser = new LyricParser();
-		self.bindEvents();
+		_this.audio = new Audio;
+		_this.setSongs([]);
+		_this.lyricParser = new LyricParser();
+		_this.bindEvents();
+    _this.setTheme(_this.options.theme);
 	},
 	getPoint: function(e) {
 		if('offsetX' in e) return {
@@ -115,16 +111,16 @@ Player.prototype = {
 		};
 	},
 	bindEvents: function() {
-		var self = this;
+		var _this = this;
 		var cursorData = null;
-		var container = self.options.container;
+		var container = _this.options.container;
 		var clickEvents = {
-			list: self.toggleList,
-			prev: self.playPrev,
-			next: self.playNext,
-			play: self.togglePlay,
+			list: _this.toggleList,
+			prev: _this.playPrev,
+			next: _this.playNext,
+			play: _this.togglePlay,
 			bar: function(e) {
-				setCursor(self.getPoint(e).x, true);
+				setCursor(_this.getPoint(e).x, true);
 			},
 		};
 		var prevent = function(e) {
@@ -137,7 +133,7 @@ Player.prototype = {
 			return function(e) {
 				prevent(e);
 				[].forEach.call(e.changedTouches, function(e) {
-					func.call(self, e);
+					func.call(_this, e);
 				});
 			};
 		};
@@ -153,67 +149,67 @@ Player.prototype = {
 			if (func) {
 				if (e.type == 'click') {
 					prevent(e);
-					func.call(self, e);
+					func.call(_this, e);
 				} else
 					touch(func)(e);
 			}
 		};
 		container.addEventListener('touchstart', eventHandler, false);
 		container.addEventListener('click', eventHandler, false);
-		self.audio.addEventListener('ended', self.playAnother.bind(self), false);
-		self.audio.addEventListener('timeupdate', function(e) {
+		_this.audio.addEventListener('ended', _this.playAnother.bind(_this), false);
+		_this.audio.addEventListener('timeupdate', function(e) {
 			var currentTime = this.currentTime;
-			var duration = self.duration;
-			if(!duration) duration = self.duration = this.duration;
+			var duration = _this.duration;
+			if(!duration) duration = _this.duration = this.duration;
 			if(!cursorData) {
 				var played = duration ? (currentTime / duration * 100) + '%' : 0;
-				self.prcur.style.left = played;
-				self.brplayed.style.width = played;
+				_this.prcur.style.left = played;
+				_this.brplayed.style.width = played;
 			}
-			self.prtime.innerHTML = self.timestr(currentTime) + ' / ' + self.timestr(duration);
-			self.lyric.innerHTML = self.safeHTML(self.lyricParser.getLyricAtTime(currentTime));
+			_this.prtime.innerHTML = _this.timestr(currentTime) + ' / ' + _this.timestr(duration);
+			_this.lyric.innerHTML = _this.safeHTML(_this.lyricParser.getLyricAtTime(currentTime));
 		}, false);
 		var fire = function(type) {
 			fireEvent({
 				type: type,
-				player: self,
+				player: _this,
 			});
 		};
 		var playStatusChange = function(e) {
 			var status = ['play', 'pause'];
 			var i = 0;
 			if(e.type == 'play') {
-				setCurrentPlayer(self);
+				setCurrentPlayer(_this);
 				fire(e.type);
 			} else {
 				i = 1;
-				if (currentPlayer === self) {
+				if (currentPlayer === _this) {
 					fire(e.type);
 					currentPlayer = null;
 				}
 			}
-			var playcls = self.items.play.classList;
-			self.classes[status[i]].split(/\s+/).forEach(function(c){
+			var playcls = _this.items.play.classList;
+			_this.classes[status[i]].split(/\s+/).forEach(function(c){
 				playcls.remove(c);
 			});
-			self.classes[status[1 - i]].split(/\s+/).forEach(function(c){
+			_this.classes[status[1 - i]].split(/\s+/).forEach(function(c){
 				playcls.add(c);
 			});
-			self.image.classList[e.type=='play'?'add':'remove']('h5p-roll');
+			_this.image.classList[e.type=='play'?'add':'remove']('h5p-roll');
 		};
-		self.audio.addEventListener('play', playStatusChange, false);
-		self.audio.addEventListener('pause', playStatusChange, false);
-		self.playlist.addEventListener('click', function(e) {
+		_this.audio.addEventListener('play', playStatusChange, false);
+		_this.audio.addEventListener('pause', playStatusChange, false);
+		_this.playlist.addEventListener('click', function(e) {
 			prevent(e);
 			var i = [].indexOf.call(this.childNodes, e.target);
-			if(i >= 0) self.play(i);
+			if(i >= 0) _this.play(i);
 		}, false);
 		var setCursor = function(x, play) {
-			var newPos = x / self.items.bar.offsetWidth;
+			var newPos = x / _this.items.bar.offsetWidth;
 			if(newPos < 0) newPos = 0;
 			else if(newPos > 1) newPos = 1;
-			self.prcur.style.left = self.brplayed.style.width = newPos * 100 + '%';
-			if(play) self.audio.currentTime = ~~ (newPos * self.duration);
+			_this.prcur.style.left = _this.brplayed.style.width = newPos * 100 + '%';
+			if(play) _this.audio.currentTime = ~~ (newPos * _this.duration);
 		};
 		var movingCursor = function(e) {
 			prevent(e);
@@ -238,7 +234,7 @@ Player.prototype = {
 			prevent(e);
 			if(!cursorData) {
 				cursorData = {
-					delta: e.clientX - self.brplayed.offsetWidth,
+					delta: e.clientX - _this.brplayed.offsetWidth,
 				};
 				container.addEventListener('touchmove', touchMovingCursor, false);
 				container.addEventListener('mousemove', movingCursor, false);
@@ -246,10 +242,10 @@ Player.prototype = {
 				container.addEventListener('mouseup', endMovingCursor, false);
 			}
 		};
-		self.prcur.addEventListener('touchstart', touch(startMovingCursor), false);
-		self.prcur.addEventListener('mousedown', startMovingCursor, false);
+		_this.prcur.addEventListener('touchstart', touch(startMovingCursor), false);
+		_this.prcur.addEventListener('mousedown', startMovingCursor, false);
 		// to stop click event on the progress bar
-		self.prcur.addEventListener('click', prevent, false);
+		_this.prcur.addEventListener('click', prevent, false);
 	},
 	safeHTML: function(html) {
 		return html.replace(/[&"<]/g, function(m) {
@@ -261,19 +257,19 @@ Player.prototype = {
 		});
 	},
 	toggleList: function(e) {
-		var self = this;
-		self.items.list.classList.toggle('h5p-active');
-		var display = self.playlist.style.display;
-		self.playlist.style.display = display ? '' : 'block';
+		var _this = this;
+		_this.items.list.classList.toggle('h5p-active');
+		var display = _this.playlist.style.display;
+		_this.playlist.style.display = display ? '' : 'block';
 	},
 	togglePlay: function(e) {
-		var self = this;
-		if(self.current < 0)
-			self.play(0);
-		else if(self.audio.paused)
-			self.audio.play();
+		var _this = this;
+		if(_this.current < 0)
+			_this.play(0);
+		else if(_this.audio.paused)
+			_this.audio.play();
 		else
-			self.audio.pause();
+			_this.audio.pause();
 	},
 	playPrev: function(e) {
 		this.play(this.previous());
@@ -292,100 +288,91 @@ Player.prototype = {
 	 *   url: string
 	 *   artist: (optional) string
 	 *   duration: (optional) int (seconds)
-	 *   image: (optional) string
-	 *   smallimage: (optional) string
+	 *   image: (optional) string | object
+   *     the object should have theme names as keys and image paths as values
 	 *   lyric: (optional) string
-	 *   lyricjsonp: (optional) string
 	 * }
 	 */
 	setSongs: function(songs) {
-		var self = this, data = [];
-		self.songs = songs;
-		self.songs.forEach(function(song) {
-			var name = self.safeHTML(song.name);
+		var _this = this, data = [];
+		_this.songs = songs;
+		_this.songs.forEach(function(song) {
+			var name = _this.safeHTML(song.name);
 			data.push('<div title="'+name+'">'+name+'</div>');
 		});
-		self.playlist.innerHTML = data.join('');
-		self.current = -1;
-		self.audio.src = '';
-		self.duration = 0;
-		self.showInfo(self.songs[0]);
+		_this.playlist.innerHTML = data.join('');
+		_this.current = -1;
+		_this.audio.src = '';
+		_this.duration = 0;
+		_this.showInfo(_this.songs[0]);
 	},
-	showInfo: function(song) {
-		var self = this;
-		var image;
-		song = song || {};
-		if(self.theme == 'simple')
-			image = song.smallimage || self.options.smallimage;
-		image = image || song.image || self.options.image || '';
+  updateInfo: function (song) {
+    var _this = this;
+    var _song = _this.songs[_this.current];
+    if (!song) song = _song || {};
+    // update image
+    var image = song.image;
+    if (typeof image == 'object') image = image[_this.theme];
+		image = image || _this.options.image || '';
 		if(image)
-			self.image.innerHTML = '<img src="' + self.safeHTML(image) + '">';
-		self.title.innerHTML = self.safeHTML(song.name || '');
-		self.artist.innerHTML = self.safeHTML(song.artist || '');
+			_this.image.innerHTML = '<img src="' + _this.safeHTML(image) + '">';
+    // update lyric
+    _this.lyric.innerHTML = '';
+    if (_this.theme != 'simple' && _song)
+      _this.getLyric(_song);
+  },
+  setTheme: function (theme) {
+    var _this = this;
+		var i = _this.themes.indexOf(theme);
+		if(i < 0) i = 0;
+		_this.options.container.classList.add('h5p-' + (_this.theme = _this.themes[i]));
+    _this.updateInfo();
+  },
+	showInfo: function(song) {
+    var _this = this;
+    song = song || {};
+    _this.updateInfo(song);
+		_this.title.innerHTML = _this.safeHTML(song.name || '');
+		_this.artist.innerHTML = _this.safeHTML(song.artist || '');
 	},
-	getLyric: function(timeout) {
-		var self = this;
-		var song = self.songs[self.current];
-		if('lyric' in song) {
-			self.lyricParser.setLyric(song.lyric);
-		} else {
-			self.lyricParser.setLyric();
-			if('lyricjsonp' in song) {
-				var jsonp = 'setLyric' + Date.now().toString(16) + (~~ (Math.random() * 0xffff)).toString(16);
-				var timeoutObj;
-				window[jsonp] = function(r) {
-					if(r['code'] != 200)
-						song.lyric = null;
-					else {
-						song.lyric = r.lyric;
-						if(song === self.songs[self.current])
-							self.lyricParser.setLyric(song.lyric);
-					}
-					delete window[jsonp];
-					if(timeoutObj) {
-						clearTimeout(timeoutObj);
-						timeoutObj = null;
-					}
-				};
-				var s = document.createElement('script');
-				s.src = song.lyricjsonp + (/\?/.test(song.lyricjsonp) ? '&' : '?') + 'jsonp=' + jsonp;
-				s.onload = function(){
-					document.body.removeChild(s);
-				};
-				document.body.appendChild(s);
-				if(timeout) timeoutObj = setTimeout(function() {
-					delete window[jsonp];
-					timeoutObj = null;
-				}, timeout);
-			}
-		}
+	getLyric: function(song) {
+		var _this = this;
+    if ('lyric' in song) {
+      _this.lyricParser.setLyric(song.lyric || '');
+    } else {
+      _this.lyricParser.setLyric();
+      var cb = _this.options.lyricCallback;
+      if (cb) {
+        var current = _this.current;
+        cb(extend({}, song), function(data) {
+          if (current == _this.current && !song.lyric)
+            _this.lyricParser.setLyric(song.lyric = data);
+        });
+      }
+    }
 	},
 	play: function(i) {
-		var self = this;
-		var song = self.songs[Number(i)];
+		var _this = this;
+		var song = _this.songs[Number(i)];
 		if (!song)
-			song = self.songs[i = 0];
+			song = _this.songs[i = 0];
 		if (!song) return;
-		if(self.current == i) {
-			self.audio.currentTime = 0;
+		if(_this.current == i) {
+			_this.audio.currentTime = 0;
 		} else {
-			var children = self.playlist.childNodes;
-			var last = children[self.current];
+			var children = _this.playlist.childNodes;
+			var last = children[_this.current];
 			if(last) last.classList.remove('h5p-active');
-			self.current = i;
+			_this.current = i;
 			children[i].classList.add('h5p-active');
-			self.audio.src = song.url;
-			self.duration = song.duration ? song.duration / 1000 : null;
-			self.showInfo(song);
-			if(self.theme!='simple') {
-				self.lyric.innerHTML = '';
-				self.getLyric(10000);
-			}
+			_this.audio.src = song.url;
+			_this.duration = song.duration ? song.duration / 1000 : null;
+      _this.showInfo(song);
 		}
-		self.prtime.innerHTML = '';
-		self.prcur.style.left = 0;
-		self.brplayed.style.width = 0;
-		self.audio.play();
+		_this.prtime.innerHTML = '';
+		_this.prcur.style.left = 0;
+		_this.brplayed.style.width = 0;
+		_this.audio.play();
 	},
 	previous: function() {
 		return (this.current + this.songs.length - 1) % this.songs.length;
@@ -402,12 +389,12 @@ Player.prototype = {
 		return m + ':' + s;
 	},
 	destroy: function() {
-		var self = this;
-		self.lyricParser = null;
-		self.audio.src = '';
-		self.audio = null;
-		self.options.container.innerHTML = '';
-		self.options.container.classList.remove('h5p');
+		var _this = this;
+		_this.lyricParser = null;
+		_this.audio.src = '';
+		_this.audio = null;
+		_this.options.container.innerHTML = '';
+		_this.options.container.classList.remove('h5p');
 		var i = players.indexOf(this);
 		if(i >= 0) players.splice(i, 1);
 	},

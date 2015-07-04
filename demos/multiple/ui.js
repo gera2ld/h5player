@@ -12,7 +12,6 @@
 		}
 	};
 	var players = document.getElementById('players');
-	var s=document.createElement('script');
 
 	// custom events
 	document.addEventListener('PlayerEvent', function(e) {
@@ -23,10 +22,8 @@
 		document.title = title;
 	}, false);
 
-	if(location.search=='?xiami')
-		s.src='http://wsgi.oschina.mopaas.com/music/xiami/songs/1774005550?jsonp=init';
-	else
-		s.src='http://gerald.lan/~music/163/playlist/66163538?jsonp=init';
+	var s=document.createElement('script');
+  s.src='http://gerald.top/~music/163/playlist/66163538?jsonp=init';
 	s.onload=function(){document.body.removeChild(s);}
 	document.body.appendChild(s);
 }();
