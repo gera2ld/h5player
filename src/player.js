@@ -325,8 +325,14 @@ Player.prototype = {
     var _this = this;
 		var i = _this.themes.indexOf(theme);
 		if(i < 0) i = 0;
-		_this.options.container.classList.add('h5p-' + (_this.theme = _this.themes[i]));
-    _this.updateInfo();
+    var oldTheme = _this.theme;
+    _this.theme = _this.themes[i];
+    if (oldTheme != _this.theme) {
+      var container = _this.options.container;
+      container.classList.remove('h5p-' + oldTheme);
+      container.classList.add('h5p-' + _this.theme);
+      _this.updateInfo();
+    }
   },
 	showInfo: function(song) {
     var _this = this;
