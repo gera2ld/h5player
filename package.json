@@ -11,6 +11,7 @@
   "license": "MIT",
   "devDependencies": {
     "gulp": "^3.9.0",
+    "gulp-autoprefixer": "^2.3.1",
     "gulp-clone": "^1.0.0",
     "gulp-concat": "^2.6.0",
     "gulp-css2js": "^1.0.2",

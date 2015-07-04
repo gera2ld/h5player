@@ -10,6 +10,7 @@ var rename = require('gulp-rename');
 var wrap = require('gulp-wrap');
 var clone = require('gulp-clone');
 var header = require('gulp-header');
+var autoprefixer = require('gulp-autoprefixer');
 var pkg = require('./package.json');
 var banner = [
 	'/**',
@@ -38,6 +39,10 @@ gulp.task('build-css', function () {
   var stream = gulp.src('src/*.less')
     .pipe(concat('player.less'))
     .pipe(less())
+    .pipe(autoprefixer({
+      browsers: ['last 2 versions'],
+      cascade: false,
+    }))
     .pipe(minifyCss())
     .pipe(rename({suffix:'.min'}));
   assets_css = stream.pipe(clone());
