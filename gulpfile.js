@@ -13,13 +13,13 @@ var header = require('gulp-header');
 var autoprefixer = require('gulp-autoprefixer');
 var pkg = require('./package.json');
 var banner = [
-	'/**',
-	' * <%= pkg.title %> - <%= pkg.description %>',
-	' * @version v<%= pkg.version %>',
-	' * @license <%= pkg.license %>',
-	' * @author <%= pkg.author %>',
-	' */',
-	'',
+  '/**',
+  ' * <%= pkg.title %> - <%= pkg.description %>',
+  ' * @version v<%= pkg.version %>',
+  ' * @license <%= pkg.license %>',
+  ' * @author <%= pkg.author %>',
+  ' */',
+  '',
 ].join('\n');
 var assets_js;
 var assets_css;
@@ -50,12 +50,12 @@ gulp.task('build-css', function () {
 });
 
 gulp.task('build', ['build-js', 'build-css'], function() {
-	return merge2(assets_css.pipe(css2js()), assets_js)
+  return merge2(assets_css.pipe(css2js()), assets_js)
     .pipe(concat('player-with-css.js'))
-		.pipe(uglify())
-		.pipe(header(banner, {pkg: pkg}))
-		.pipe(rename({suffix:'.min'}))
-		.pipe(gulp.dest('dist/'));
+    .pipe(uglify())
+    .pipe(header(banner, {pkg: pkg}))
+    .pipe(rename({suffix:'.min'}))
+    .pipe(gulp.dest('dist/'));
 });
 
 gulp.task('default', ['build']);

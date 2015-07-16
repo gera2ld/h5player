@@ -15,22 +15,22 @@ Usage
 <div id="player"></div>
 <script>
 var player = new Player({
-	container: document.getElementById('player'),
-	image: 'http://example.com/path/to/default/image',
-	lyricCallback: function (song, cb) {
-		var lyric = getLyricFromSomewhereElse(song);
-		cb(lyric);
-	},
+  container: document.getElementById('player'),
+  image: 'http://example.com/path/to/default/image',
+  lyricCallback: function (song, cb) {
+    var lyric = getLyricFromSomewhereElse(song);
+    cb(lyric);
+  },
 });
 player.setSongs([
-	{
-		name: 'Song1',
-		url: 'http://example.com/path/to/song1.mp3',
-		additionalInfo: 'whatever',
-	}, {
-		name: 'Song2',
-		url: 'http://example.com/path/to/song2.mp3',
-	}
+  {
+    name: 'Song1',
+    url: 'http://example.com/path/to/song1.mp3',
+    additionalInfo: 'whatever',
+  }, {
+    name: 'Song2',
+    url: 'http://example.com/path/to/song2.mp3',
+  }
 ]);
 player.play(0);
 </script>
@@ -46,7 +46,7 @@ Each player is built with `new Player(options)`. *options* is an object with pro
   Reference to a DOM element to hold the player panel.
 
 * `theme`: *optional* string  
-  currently there are two themes available: **simple** and **normal**. The default value is **normal**.
+  Currently there are two themes available: **simple** and **normal**. The default value is **normal**.
 
 * `image`: *optional* string *or* object  
   Image shown when no image is assigned for the current song.  
@@ -73,7 +73,7 @@ Each player is built with `new Player(options)`. *options* is an object with pro
 The `Player` object has following methods:
 
 * `setSongs`(*Array* songs)  
-  set playlist for the player, *songs* is a list of `object`s with properties below:
+  Set playlist for the player, *songs* is a list of `object`s with properties below:
   * `name`: *required* string  
     The name of the song.
   * `url`: *required* string  
@@ -88,12 +88,12 @@ The `Player` object has following methods:
     Lyric of the song. May be something like `[00:00]foo\n[00:05]bar\n...`.
 
 * `play`(*int* index)  
-  start playing the *index*-th song.
+  Start playing the *index*-th song.
 
 When the play status is changed, a `PlayerEvent` will be fired with its `detail` set to an object with following attributes:
 
 * `player`  
-  the `Player` object that is related to this event
+  The `Player` object that is related to this event
 
 * `type`  
   `'play'` or `'pause'`

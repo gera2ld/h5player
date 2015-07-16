@@ -1,10 +1,10 @@
 @keyframes h5p-roll {
-	from {
-		transform: rotate(0deg);
-	}
-	to {
-		transform: rotate(360deg);
-	}
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 // common styles
@@ -12,182 +12,182 @@
 @bar-color: silver;
 @played-color: brown;
 .h5p {
-	background: #fff;
-	box-shadow: 0 0 10px gray;
-	position: relative;
+  background: #fff;
+  box-shadow: 0 0 10px gray;
+  position: relative;
 }
 .h5p-button {
-	cursor: pointer;
-	&:hover, &.h5p-active {
-		color: dodgerblue;
-	}
+  cursor: pointer;
+  &:hover, &.h5p-active {
+    color: dodgerblue;
+  }
 }
 .h5p-image {
-	position: absolute;
-	img {
-		width: 100%;
-		height: 100%;
-	}
+  position: absolute;
+  img {
+    width: 100%;
+    height: 100%;
+  }
 }
 .h5p-title {
-	font-weight: bold;
+  font-weight: bold;
 }
 .h5p-bar {
-	height: @bar-height;
-	background: @bar-color;
-	position: relative;
+  height: @bar-height;
+  background: @bar-color;
+  position: relative;
 }
 .h5p-played {
-	position: absolute;
-	top: 0;
-	height: @bar-height;
-	background: @played-color;
+  position: absolute;
+  top: 0;
+  height: @bar-height;
+  background: @played-color;
 }
 .h5p-playlist {
-	display: none;
-	max-height: 200px;
-	border-top: 1px dashed gray;
-	padding: .5em 1em;
-	overflow-y: auto;
-	&>div {
-		white-space: nowrap;
-		text-overflow: ellipsis;
-		color: #1a1a1a;
-		cursor: pointer;
-		&.h5p-active {
-			color: dodgerblue;
-			font-weight: bold;
-		}
-		&:hover {
-			color: orange;
-			font-weight: bold;
-		}
-	}
+  display: none;
+  max-height: 200px;
+  border-top: 1px dashed gray;
+  padding: .5em 1em;
+  overflow-y: auto;
+  &>div {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: #1a1a1a;
+    cursor: pointer;
+    &.h5p-active {
+      color: dodgerblue;
+      font-weight: bold;
+    }
+    &:hover {
+      color: orange;
+      font-weight: bold;
+    }
+  }
 }
 
 // Theme: normal
 .h5p-normal {
-	border-radius: 3px;
-	max-width: 400px;
-	font-size: 16px;
-	.h5p-image {
-		width: 130px;
-		height: 130px;
-		left: 10px;
-		top: 10px;
-		animation: h5p-roll 8s linear infinite;
-		animation-play-state: paused;
-		img {
-			border-radius: 50%;
-		}
-	}
-	.h5p-roll {
-		animation-play-state: running;
-	}
-	.h5p-buttons {
-		position: absolute;
-		top: 10px;
-		right: 10px;
-		font-size: 20px;
-		.h5p-button {
-			margin-left: 5px;
-		}
-	}
-	.h5p-info {
-		padding: 30px 10px 0 150px;
-		text-align: center;
-		height: 70px;
-	}
-	.h5p-control {
-		padding: 0 10px 20px 150px;
-		text-align: center;
-		.h5p-button {
-			margin: 10px;
-			font-size: 30px;
-		}
-	}
-	.h5p-artist {
-		font-size: 10px;
-		height: 20px;
-	}
-	.h5p-lyric {
-		text-align: center;
-		color: brown;
-		font-size: 12px;
-		height: 24px;
-	}
-	@cur-color: white;
-	@cur-height: 10px;
-	@cur-width: 10px;
-	.h5p-progress {
-		padding: 5px 10px;
-	}
-	.h5p-wrap {
-		position: relative;
-		padding: (@cur-height - @bar-height) / 2 0;
-	}
-	.h5p-cursor {
-		cursor: pointer;
-		position: absolute;
-		border: 1px solid @bar-color;
-		background: @cur-color;
-		border-radius: 50%;
-		width: @cur-width;
-		height: @cur-height;
-		top: 0;
-		margin-left: -@cur-width / 2;
-	}
-	.h5p-time {
-		font-size: 10px;
-		position: absolute;
-		right: 0;
-		top: -20px;
-	}
+  border-radius: 3px;
+  max-width: 400px;
+  font-size: 16px;
+  .h5p-image {
+    width: 130px;
+    height: 130px;
+    left: 10px;
+    top: 10px;
+    animation: h5p-roll 8s linear infinite;
+    animation-play-state: paused;
+    img {
+      border-radius: 50%;
+    }
+  }
+  .h5p-roll {
+    animation-play-state: running;
+  }
+  .h5p-buttons {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    .h5p-button {
+      margin-left: 5px;
+    }
+  }
+  .h5p-info {
+    padding: 30px 10px 0 150px;
+    text-align: center;
+    height: 70px;
+  }
+  .h5p-control {
+    padding: 0 10px 20px 150px;
+    text-align: center;
+    .h5p-button {
+      margin: 10px;
+      font-size: 30px;
+    }
+  }
+  .h5p-artist {
+    font-size: 10px;
+    height: 20px;
+  }
+  .h5p-lyric {
+    text-align: center;
+    color: brown;
+    font-size: 12px;
+    height: 24px;
+  }
+  @cur-color: white;
+  @cur-height: 10px;
+  @cur-width: 10px;
+  .h5p-progress {
+    padding: 5px 10px;
+  }
+  .h5p-wrap {
+    position: relative;
+    padding: (@cur-height - @bar-height) / 2 0;
+  }
+  .h5p-cursor {
+    cursor: pointer;
+    position: absolute;
+    border: 1px solid @bar-color;
+    background: @cur-color;
+    border-radius: 50%;
+    width: @cur-width;
+    height: @cur-height;
+    top: 0;
+    margin-left: -@cur-width / 2;
+  }
+  .h5p-time {
+    font-size: 10px;
+    position: absolute;
+    right: 0;
+    top: -20px;
+  }
 }
 
 // Theme: simple
 .h5p-simple {
-	border-radius: 2px;
-	max-width: 300px;
-	height: 36px;
-	.h5p-image {
-		width: 34px;
-		height: 34px;
-	}
-	.h5p-buttons, .h5p-lyric, .h5p-time {
-		display: none;
-	}
-	.h5p-info {
-		position: absolute;
-		top: 0;
-		left: 40px;
-		right: 72px;
-		line-height: 34px;
-		font-size: 10px;
-		white-space: nowrap;
-		text-overflow: ellipsis;
-		overflow: hidden;
-		&>* {
-			margin: 0 5px;
-		}
-	}
-	.h5p-control {
-		position: absolute;
-		top: 0;
-		right: 5px;
-		line-height: 34px;
-		.h5p-button {
-			display: inline-block;
-			margin: 0 5px;
-			font-size: 18px;
-		}
-	}
-	.h5p-title, .h5p-artist {
-		display: inline;
-	}
-	.h5p-progress {
-		position: absolute;
-		bottom: 0;
-		width: 100%;
-	}
+  border-radius: 2px;
+  max-width: 300px;
+  height: 36px;
+  .h5p-image {
+    width: 34px;
+    height: 34px;
+  }
+  .h5p-buttons, .h5p-lyric, .h5p-time {
+    display: none;
+  }
+  .h5p-info {
+    position: absolute;
+    top: 0;
+    left: 40px;
+    right: 72px;
+    line-height: 34px;
+    font-size: 10px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    &>* {
+      margin: 0 5px;
+    }
+  }
+  .h5p-control {
+    position: absolute;
+    top: 0;
+    right: 5px;
+    line-height: 34px;
+    .h5p-button {
+      display: inline-block;
+      margin: 0 5px;
+      font-size: 18px;
+    }
+  }
+  .h5p-title, .h5p-artist {
+    display: inline;
+  }
+  .h5p-progress {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+  }
 }
