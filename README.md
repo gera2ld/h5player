@@ -1,6 +1,10 @@
 HTML5 Player
 ===
+
 ![Bower](https://img.shields.io/bower/v/h5player.svg)
+![NPM](https://img.shields.io/npm/v/h5player.svg)
+![License](https://img.shields.io/npm/l/h5player.svg)
+![Downloads](https://img.shields.io/npm/dt/h5player.svg)
 
 Installation
 ---
