@@ -6,6 +6,7 @@
   "scripts": {
     "build": "gulp build"
   },
+  "main": "dist/player.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/gera2ld/h5player"
