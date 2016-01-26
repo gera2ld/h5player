@@ -1,4 +1,76 @@
 /**
+ * H5Player - A simple but powerful HTML5 music player
+ * @version v1.2.0
+ * @license MIT
+ * @author Gerald <gera2ld@163.com>
+ */
+!function(){
+/**
+ * Lyric Parser
+ * Parse lyrics and get lyric by time
+ * @author Gerald <gera2ld@163.com>
+ */
+'use strict';
+function LyricParser() {
+  this.data = [];
+  this.last = 0;
+}
+LyricParser.prototype = {
+  setLyric: function(lyric) {
+    var data = this.data = [];
+    this.last = 0;
+    if(lyric) {
+      var reg = /^\[([^\]]*)\]\s*(.*)$/;
+      lyric.split(/\n/).forEach(function(line) {
+        var m = line.match(reg);
+        if(m) {
+          var t = 0;
+          m[1].split(/:/).forEach(function(part){
+            t = t * 60 + Number(part);
+          });
+          data.push([t, m[2]]);
+        }
+      });
+    }
+  },
+  getLyricAtTime: function(time) {
+    var self = this;
+    var data = self.data;
+    var last = self.last;
+    var line = data[last] || data[last = 0];
+    var next;
+    if(line) {
+      if(line[0] < time) {
+        while((next = data[++ last]) && next[0] <= time)
+          line = next;
+        self.last = last - 1;
+      } else {
+        while(line && line[0] > time)
+          line = data[-- last];
+        self.last = last;
+      }
+    }
+    return line ? line[1] : '';
+  },
+};
+
+(function (doc, cssText) {
+    var styleEl = doc.createElement("style");
+    doc.getElementsByTagName("head")[0].appendChild(styleEl);
+    if (styleEl.styleSheet) {
+        if (!styleEl.styleSheet.disabled) {
+            styleEl.styleSheet.cssText = cssText;
+        }
+    } else {
+        try {
+            styleEl.innerHTML = cssText;
+        } catch (ignore) {
+            styleEl.innerText = cssText;
+        }
+    }
+}(document, ".h5p-playlist>div,.h5p-simple .h5p-info{white-space:nowrap;text-overflow:ellipsis}@-webkit-keyframes h5p-roll{from{-webkit-transform:rotate(0);transform:rotate(0)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes h5p-roll{from{-webkit-transform:rotate(0);transform:rotate(0)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}.h5p{background:#fff;box-shadow:0 0 10px gray;position:relative}.h5p-button{cursor:pointer}.h5p-button.h5p-active,.h5p-button:hover{color:#1e90ff}.h5p-image{position:absolute}.h5p-image img{width:100%;height:100%}.h5p-title{font-weight:700}.h5p-bar{height:2px;background:silver;position:relative}.h5p-played{position:absolute;top:0;height:2px;background:brown}.h5p-playlist{display:none;max-height:200px;border-top:1px dashed gray;padding:.5em 1em;overflow-y:auto}.h5p-playlist>div{color:#1a1a1a;cursor:pointer}.h5p-playlist>div.h5p-active{color:#1e90ff;font-weight:700}.h5p-playlist>div:hover{color:orange;font-weight:700}.h5p-normal{border-radius:3px;max-width:400px;font-size:16px}.h5p-normal .h5p-image{width:130px;height:130px;left:10px;top:10px;-webkit-animation:h5p-roll 8s linear infinite;animation:h5p-roll 8s linear infinite;-webkit-animation-play-state:paused;animation-play-state:paused}.h5p-normal .h5p-image img{border-radius:50%}.h5p-normal .h5p-roll{-webkit-animation-play-state:running;animation-play-state:running}.h5p-normal .h5p-buttons{position:absolute;top:10px;right:10px;font-size:20px}.h5p-normal .h5p-buttons .h5p-button{margin-left:5px}.h5p-normal .h5p-info{padding:30px 10px 0 150px;text-align:center;height:70px}.h5p-normal .h5p-control{padding:0 10px 20px 150px;text-align:center}.h5p-normal .h5p-control .h5p-button{margin:10px;font-size:30px}.h5p-normal .h5p-artist{font-size:10px;height:20px}.h5p-normal .h5p-lyric{text-align:center;color:brown;font-size:12px;height:24px}.h5p-normal .h5p-progress{padding:5px 10px}.h5p-normal .h5p-wrap{position:relative;padding:4px 0}.h5p-normal .h5p-cursor{cursor:pointer;position:absolute;border:1px solid silver;background:#fff;border-radius:50%;width:10px;height:10px;top:0;margin-left:-5px}.h5p-normal .h5p-time{font-size:10px;position:absolute;right:0;top:-20px}.h5p-simple{border-radius:2px;max-width:300px;height:36px}.h5p-simple .h5p-image{width:34px;height:34px}.h5p-simple .h5p-buttons,.h5p-simple .h5p-lyric,.h5p-simple .h5p-time{display:none}.h5p-simple .h5p-info{position:absolute;top:0;left:40px;right:72px;line-height:34px;font-size:10px;overflow:hidden}.h5p-simple .h5p-info>*{margin:0 5px}.h5p-simple .h5p-control{position:absolute;top:0;right:5px;line-height:34px}.h5p-simple .h5p-control .h5p-button{display:inline-block;margin:0 5px;font-size:18px}.h5p-simple .h5p-artist,.h5p-simple .h5p-title{display:inline}.h5p-simple .h5p-progress{position:absolute;bottom:0;width:100%}"));
+
+/**
  * HTML5 Player
  * @author Gerald <gera2ld@163.com>
  */
@@ -416,3 +488,5 @@ Player.prototype = {
     Player: Player,
   };
 });
+
+}();

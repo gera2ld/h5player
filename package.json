@@ -3,6 +3,9 @@
   "version": "1.2.0",
   "title": "H5Player",
   "description": "A simple but powerful HTML5 music player",
+  "scripts": {
+    "build": "gulp build"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/gera2ld/h5player"
@@ -11,16 +14,15 @@
   "license": "MIT",
   "devDependencies": {
     "gulp": "^3.9.0",
-    "gulp-autoprefixer": "^2.3.1",
-    "gulp-clone": "^1.0.0",
     "gulp-concat": "^2.6.0",
     "gulp-css2js": "^1.0.2",
-    "gulp-header": "^1.2.2",
-    "gulp-less": "^3.0.2",
-    "gulp-minify-css": "^1.2.0",
+    "gulp-header": "^1.7.1",
+    "gulp-less": "^3.0.5",
     "gulp-rename": "^1.2.2",
-    "gulp-uglify": "^1.2.0",
+    "gulp-uglify": "^1.5.1",
     "gulp-wrap": "^0.11.0",
-    "merge2": "^0.3.6"
+    "less-plugin-autoprefix": "^1.5.1",
+    "less-plugin-clean-css": "^1.5.1",
+    "merge2": "^1.0.0"
   }
 }
