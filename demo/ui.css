@@ -3,12 +3,17 @@
   margin: 0;
   padding: 0;
 }
+
 body {
+  max-width: 500px;
+  margin: 1em auto;
   font-family: Microsoft YaHei;
 }
+
 h1 {
   text-align: center;
 }
+
 #players>* {
   margin: 1em auto;
 }

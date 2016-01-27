@@ -115,6 +115,13 @@ Document
 
 Demos
 ---
+* Run local demo:
+
+  ``` sh
+  $ npm install
+  $ npm start
+  ```
+
 * <http://gerald.top/code/h5player>
 
 Snapshots
