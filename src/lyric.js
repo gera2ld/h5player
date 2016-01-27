@@ -13,7 +13,7 @@ LyricParser.prototype = {
     var data = this.data = [];
     this.last = 0;
     if(lyric) {
-      var reg = /^\[([^\]]*)\]\s*(.*)$/;
+      var reg = /^\[([\d:.]+)\]\s*(.*)$/;
       lyric.split(/\n/).forEach(function(line) {
         var m = line.match(reg);
         if(m) {

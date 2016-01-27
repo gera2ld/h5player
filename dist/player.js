@@ -1,6 +1,6 @@
 /**
  * H5Player - A simple but powerful HTML5 music player
- * @version v1.3.0
+ * @version v1.3.1
  * @license MIT
  * @author Gerald <gera2ld@163.com>
  */
@@ -20,7 +20,7 @@ LyricParser.prototype = {
     var data = this.data = [];
     this.last = 0;
     if(lyric) {
-      var reg = /^\[([^\]]*)\]\s*(.*)$/;
+      var reg = /^\[([\d:.]+)\]\s*(.*)$/;
       lyric.split(/\n/).forEach(function(line) {
         var m = line.match(reg);
         if(m) {
