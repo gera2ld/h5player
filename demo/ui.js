@@ -3,7 +3,6 @@ fetch('/ne/playlist/66163538')
 .then(data => {
   var container = document.querySelector('#players');
   var single;
-  var players = [];
   setMode(true);
 
   document.querySelector('#mode>button').addEventListener('click', e => {
@@ -27,8 +26,6 @@ fetch('/ne/playlist/66163538')
 
   function reset() {
     container.innerHTML = '';
-    players.forEach(player => player.destroy());
-    players = [];
   }
 
   function initSingle() {
@@ -55,7 +52,6 @@ fetch('/ne/playlist/66163538')
       theme: theme,
       lyricCallback: lyricCallback,
     });
-    players.push(player);
     return player;
   }
 

@@ -1,9 +1,8 @@
 /**
  * Lyric Parser
- * Parse lyrics and get lyric by time
+ * @desc Parse lyrics and get lyric by time
  * @author Gerald <gera2ld@163.com>
  */
-'use strict';
 function LyricParser() {
   this.data = [];
   this.last = 0;

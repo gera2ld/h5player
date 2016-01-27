@@ -7,10 +7,9 @@
 !function(){
 /**
  * Lyric Parser
- * Parse lyrics and get lyric by time
+ * @desc Parse lyrics and get lyric by time
  * @author Gerald <gera2ld@163.com>
  */
-'use strict';
 function LyricParser() {
   this.data = [];
   this.last = 0;
@@ -74,7 +73,6 @@ LyricParser.prototype = {
  * HTML5 Player
  * @author Gerald <gera2ld@163.com>
  */
-'use strict';
 
 // manage all the players to ensure only one is playing at once
 var players = [];
@@ -100,6 +98,11 @@ function setCurrentPlayer(player) {
   });
 }
 
+var themes = [
+  'normal',
+  'simple',
+];
+
 function Player(options) {
   this.options = options;
   this.init();
@@ -113,10 +116,6 @@ Player.prototype = {
     next: 'fa fa-step-forward',
     pause: 'fa fa-pause',
   },
-  themes: [
-    'normal',
-    'simple',
-  ],
   init: function() {
     var _this = this;
     var container = _this.options.container;
@@ -164,6 +163,10 @@ Player.prototype = {
       _this.items[item.dataset.id] = item;
     });
     _this.audio = new Audio;
+    // audio:not([controls]) should be hidden, just in case
+    _this.audio.style.display = 'none';
+    // attach audio to DOM so that media stops when audio is detached
+    container.appendChild(_this.audio);
     _this.setSongs([]);
     _this.lyricParser = new LyricParser();
     _this.bindEvents();
@@ -395,10 +398,10 @@ Player.prototype = {
   },
   setTheme: function (theme) {
     var _this = this;
-    var i = _this.themes.indexOf(theme);
+    var i = themes.indexOf(theme);
     if(i < 0) i = 0;
     var oldTheme = _this.theme;
-    _this.theme = _this.themes[i];
+    _this.theme = themes[i];
     if (oldTheme != _this.theme) {
       var container = _this.options.container;
       container.classList.remove('h5p-' + oldTheme);
