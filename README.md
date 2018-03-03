@@ -66,16 +66,21 @@ $ npm install h5player -S
 
 Each player is built with `player = new H5Player(options)`. *options* is an object with properties below:
 
-* `theme`: *optional* string  
+* `theme`: *optional* string
 
   Possible values are `normal` (by default) and `simple`.
   Can be changed by `player.setTheme(theme)`.
+
+* `mode`: *optional* string
+
+  The repeat mode for the playlist, possible values are `repeatAll` (by default), `repeatOne` and `repeatOff`.
+  Can be changed by `player.setMode(mode)`.
 
 * `showPlaylist`: *optional* Boolean
 
   Whether to show playlist. Can be changed by `player.setPlaylist(show)`.
 
-* `image`: *optional* string *or* object  
+* `image`: *optional* string *or* object
 
   Image shown when no image is assigned for the current song.  
   It can be a string of the path to the image or an object with theme names as the keys and
@@ -88,35 +93,35 @@ Each player is built with `player = new H5Player(options)`. *options* is an obje
 
 The `player` object has following methods:
 
-* `setSongs`(*Array* songs)  
+* `setSongs`(*Array* songs)
 
   Set playlist for the player, *songs* is a list of `object`s with properties below:
 
-  * `name`: *required* string  
+  * `name`: *required* string
 
     The name of the song.
 
-  * `url`: *required* string  
+  * `url`: *required* string
 
     A downloadable URL.
 
-  * `artist`: *optional* string  
+  * `artist`: *optional* string
 
     The name of the artist.
 
-  * `duration`: *optional* integer  
+  * `duration`: *optional* integer
 
     Length of the song in seconds.
 
-  * `image`: *optional* string *or* object  
+  * `image`: *optional* string *or* object
 
     The image for the current song. Similar to the default image in common settings.
 
-  * `lyric`: *optional* string  
+  * `lyric`: *optional* string
 
     Lyric of the song, e.g. `[00:00]foo\n[00:05]bar\n...`.
 
-* `play`(*int* index)  
+* `play`(*int* index)
 
   Start playing the *index*-th song.
 
@@ -124,17 +129,21 @@ The `player` object has following methods:
 
   Change theme.
 
+* `setMode`(*string* mode)
+
+  Change repeat mode.
+
 * `setPlaylist`(*boolean* show)
 
   Toggle playlist on / off.
 
 When the play status is changed, a `PlayerEvent` will be fired with its `detail` set to an object with following attributes:
 
-* `player`  
+* `player`
 
   The `Player` object that is related to this event
 
-* `type`  
+* `type`
 
   `'play'` or `'pause'`
 

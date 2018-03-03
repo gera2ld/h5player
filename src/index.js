@@ -4,6 +4,16 @@ import { prevent, createElement, bindEvents, empty, createSVGIcon } from './util
 import './sprite';
 
 const H5P_ACTIVE = 'h5p-active';
+const MODES = [
+  'repeatAll',
+  'repeatOne',
+  'repeatOff',
+];
+const MODE_ICONS = {
+  repeatAll: 'h5p-repeat',
+  repeatOne: 'h5p-repeat-one',
+  repeatOff: 'h5p-repeat-off',
+};
 
 // manage all the players to ensure only one is playing at once
 const players = [];
@@ -36,6 +46,7 @@ export default class Player {
     this.build(options);
     this.setSongs([]);
     this.setTheme(options.theme);
+    this.setMode(options.mode);
     this.setPlaylist(options.showPlaylist);
   }
 
@@ -50,6 +61,12 @@ export default class Player {
     const toolbar = createElement('div', {
       className: 'h5p-toolbar',
     }, [
+      buttons.repeat = createElement('i', {
+        className: 'h5p-button',
+        on: {
+          click: this.handleSwitchMode,
+        },
+      }, [createSVGIcon('h5p-repeat')]),
       buttons.list = createElement('i', {
         className: 'h5p-button',
         on: {
@@ -140,7 +157,7 @@ export default class Player {
         this.audio.src = song.url;
         this.duration = song.duration ? song.duration / 1000 : null;
         this.showInfo(song);
-      this.progress.setCursor(0, this.duration);
+        this.progress.setCursor(0, this.duration);
       }
       this.audio.play();
     }
@@ -225,10 +242,22 @@ export default class Player {
     }
   }
 
+  setMode(mode) {
+    this.mode = MODES.indexOf(mode) < 0 ? MODES[0] : mode;
+    const icon = MODE_ICONS[this.mode];
+    this.els.buttons.repeat.firstChild.replaceWith(createSVGIcon(icon));
+  }
+
   setPlaylist(show) {
     const { playlist, buttons } = this.els;
     buttons.list.classList.toggle(H5P_ACTIVE, !!show);
     playlist.style.display = show ? 'block' : '';
+  }
+
+  handleSwitchMode = e => {
+    prevent(e);
+    const index = MODES.indexOf(this.mode);
+    this.setMode(MODES[(index + 1) % MODES.length]);
   }
 
   handleToggleList = e => {
@@ -253,7 +282,17 @@ export default class Player {
     this.play(this.next());
   }
 
-  handlePlayAnother = () => this.handlePlayNext()
+  handlePlayAnother = () => {
+    const { mode } = this;
+    if (mode === 'repeatAll') {
+      this.handlePlayNext();
+    } else if (mode === 'repeatOne') {
+      this.play();
+    } else {
+      const next = this.next();
+      if (next) this.play(next);
+    }
+  }
 
   handleUpdateTime = e => {
     const { target } = e;
@@ -287,7 +326,7 @@ export default class Player {
         this.play(i);
         break;
       }
-      }
+    }
   }
 
   handleCursorChange = pos => {
