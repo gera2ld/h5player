@@ -18,8 +18,7 @@ export function createElement(tagName, props, children) {
     });
   }
   if (children) {
-    children.forEach(item => {
-      const child = Array.isArray(item) ? createElement(...item) : item;
+    children.forEach(child => {
       el.appendChild(child);
     });
   }
@@ -39,4 +38,23 @@ export function bindEvents(el, events) {
 export function empty(el) {
   el.innerHTML = '';
   return el;
+}
+
+const NS_SVG = 'http://www.w3.org/2000/svg';
+const NS_XLINK = 'http://www.w3.org/1999/xlink';
+
+export function createSVGElement(tagName, children) {
+  const el = document.createElementNS(NS_SVG, tagName);
+  if (children) {
+    children.forEach(child => {
+      el.appendChild(child);
+    });
+  }
+  return el;
+}
+
+export function createSVGIcon(name) {
+  const use = createSVGElement('use');
+  use.setAttributeNS(NS_XLINK, 'href', `#${name}`);
+  return createSVGElement('svg', [use]);
 }

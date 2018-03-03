@@ -1,9 +1,3 @@
-/**
- * Lyric Parser
- * @desc Parse lyrics and get lyric by time
- * @author Gerald <gera2ld@163.com>
- */
-
 const RE_LYRIC = /^\[([\d:.]+)\]\s*(.*)$/;
 
 function getTime(str) {

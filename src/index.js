@@ -1,13 +1,9 @@
-/**
- * HTML5 Player
- * @author Gerald <gera2ld@163.com>
- */
 import LyricParser from './lyric';
 import Progress from './progress';
-import { prevent, createElement, bindEvents, empty } from './util';
+import { prevent, createElement, bindEvents, empty, createSVGIcon } from './util';
+import './sprite';
 
 const H5P_ACTIVE = 'h5p-active';
-const RE_SPACE = /\s+/;
 
 // manage all the players to ensure only one is playing at once
 const players = [];
@@ -34,27 +30,18 @@ export default class Player {
     'normal',
     'simple',
   ];
-  static classNames = {
-    list: 'fa fa-list',
-    prev: 'fa fa-step-backward',
-    play: 'fa fa-play',
-    next: 'fa fa-step-forward',
-    pause: 'fa fa-pause',
-  };
 
   constructor(options) {
-    this.options = options;
     players.push(this);
-    this.build();
+    this.build(options);
     this.setSongs([]);
-    this.setTheme();
+    this.setTheme(options.theme);
+    this.setPlaylist(options.showPlaylist);
   }
 
-  build() {
-    this.classNames = {
-      ...Player.classNames,
-      ...this.options.classNames,
-    };
+  build(options) {
+    this.defaultImage = options.image || '';
+    this.callbackGetLyric = options.getLyric;
     this.progress = new Progress();
     const buttons = {};
     const image = createElement('div', {
@@ -64,11 +51,11 @@ export default class Player {
       className: 'h5p-toolbar',
     }, [
       buttons.list = createElement('i', {
-        className: `h5p-button ${this.classNames.list}`,
+        className: 'h5p-button',
         on: {
           click: this.handleToggleList,
         },
-      }),
+      }, [createSVGIcon('h5p-list')]),
     ]);
     const title = createElement('div', {
       className: 'h5p-title',
@@ -82,24 +69,24 @@ export default class Player {
     const control = createElement('div', {
       className: 'h5p-control',
     }, [
-      buttons.prev = createElement('i', {
-        className: `h5p-button ${this.classNames.prev}`,
+      createElement('i', {
+        className: 'h5p-button',
         on: {
           click: this.handlePlayPrev,
         },
-      }),
+      }, [createSVGIcon('h5p-backward')]),
       buttons.play = createElement('i', {
-        className: `h5p-button ${this.classNames.play}`,
+        className: 'h5p-button',
         on: {
           click: this.handleTogglePlay,
         },
-      }),
-      buttons.next = createElement('i', {
-        className: `h5p-button ${this.classNames.next}`,
+      }, [createSVGIcon('h5p-play')]),
+      createElement('i', {
+        className: 'h5p-button',
         on: {
           click: this.handlePlayNext,
         },
-      }),
+      }, [createSVGIcon('h5p-forward')]),
     ]);
     const progress = createElement('div', {
       className: 'h5p-progress-wrap',
@@ -140,12 +127,11 @@ export default class Player {
   }
 
   play(index) {
+    if (index == null) index = this.current;
     let song = this.songs[index];
     if (!song) song = this.songs[index = 0];
     if (song) {
-      if (this.current === index) {
-        this.audio.currentTime = 0;
-      } else {
+      if (this.current !== index) {
         const { childNodes } = this.els.playlist;
         const last = childNodes[this.current];
         if (last) last.classList.remove(H5P_ACTIVE);
@@ -154,8 +140,8 @@ export default class Player {
         this.audio.src = song.url;
         this.duration = song.duration ? song.duration / 1000 : null;
         this.showInfo(song);
-      }
       this.progress.setCursor(0, this.duration);
+      }
       this.audio.play();
     }
   }
@@ -196,7 +182,7 @@ export default class Player {
     const song = item || this.songs[this.current];
     let { image } = song || {};
     if (typeof image === 'object') image = image[this.theme];
-    image = image || this.options.image || '';
+    image = image || this.defaultImage;
     const { els } = this;
     const imageEl = empty(els.image);
     if (image) {
@@ -212,9 +198,9 @@ export default class Player {
     const { lyricParser } = this;
     if (song.lyric == null) {
       lyricParser.setLyric();
-      const { lyricCallback } = this.options;
-      if (lyricCallback) {
-        lyricCallback({ ...song }, lyric => {
+      const { callbackGetLyric } = this;
+      if (callbackGetLyric) {
+        callbackGetLyric({ ...song }, lyric => {
           if (song === this.songs[this.current]) {
             lyricParser.setLyric(song.lyric = lyric || '');
           }
@@ -227,7 +213,7 @@ export default class Player {
 
   setTheme(name) {
     const { themes } = Player;
-    let index = themes.indexOf(name || this.options.theme);
+    let index = themes.indexOf(name);
     if (index < 0) index = 0;
     const oldTheme = this.theme;
     this.theme = themes[index];
@@ -239,10 +225,15 @@ export default class Player {
     }
   }
 
+  setPlaylist(show) {
+    const { playlist, buttons } = this.els;
+    buttons.list.classList.toggle(H5P_ACTIVE, !!show);
+    playlist.style.display = show ? 'block' : '';
+  }
+
   handleToggleList = e => {
-    e.target.classList.toggle(H5P_ACTIVE);
-    const active = e.target.classList.contains(H5P_ACTIVE);
-    this.els.playlist.style.display = active ? 'block' : '';
+    prevent(e);
+    this.setPlaylist(!this.els.buttons.list.classList.contains(H5P_ACTIVE));
   }
 
   handleTogglePlay = e => {
@@ -282,32 +273,26 @@ export default class Player {
       currentPlayer = null;
       fireEvent({ type, player: this });
     }
-    const { classList } = this.els.buttons.play;
-    const { classNames } = this;
-    const items = [classNames.pause, classNames.play];
-    if (isPlaying) items.reverse();
-    items.forEach((className, force) => {
-      className.split(RE_SPACE)
-      .forEach(name => {
-        if (name) classList.toggle(name, force);
-      });
-    });
+    const { play } = this.els.buttons;
+    play.firstChild.replaceWith(createSVGIcon(isPlaying ? 'h5p-pause' : 'h5p-play'));
     this.els.image.classList.toggle('h5p-roll', isPlaying);
   }
 
   handlePlayItem = e => {
     prevent(e);
-    [...this.els.playlist.childNodes].some((child, i) => {
+    const { childNodes } = this.els.playlist;
+    for (let i = 0; i < childNodes.length; i += 1) {
+      const child = childNodes[i];
       if (child === e.target) {
         this.play(i);
-        return true;
+        break;
       }
-      return false;
-    });
+      }
   }
 
   handleCursorChange = pos => {
     const currentTime = this.duration * pos | 0;
     this.audio.currentTime = currentTime;
+    this.play();
   }
 }
