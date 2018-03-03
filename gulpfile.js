@@ -1,44 +1,65 @@
+const path = require('path');
 const gulp = require('gulp');
-const concat = require('gulp-concat');
-const merge2 = require('merge2');
-const uglify = require('gulp-uglify');
+const log = require('fancy-log');
+const eslint = require('gulp-eslint');
 const less = require('gulp-less');
-const PluginCleanCss = require('less-plugin-clean-css');
-const PluginAutoPrefix = require('less-plugin-autoprefix');
-const cleanCss = new PluginCleanCss({advanced: true});
-const autoPrefix = new PluginAutoPrefix();
-const css2js = require('gulp-css2js');
-const rename = require('gulp-rename');
-const wrap = require('gulp-wrap');
-const header = require('gulp-header');
+const autoprefixer = require('gulp-autoprefixer');
+const rollup = require('rollup');
 const pkg = require('./package.json');
-const banner = [
-  '/**',
-  ' * <%= pkg.title %> - <%= pkg.description %>',
-  ' * @version v<%= pkg.version %>',
-  ' * @license <%= pkg.license %>',
-  ' * @author <%= pkg.author %>',
-  ' */',
-  '',
-].join('\n');
 
-gulp.task('build', () => (
-  merge2([
-    gulp.src('src/*.js'),
-    gulp.src('src/*.less')
-    .pipe(concat('player.less'))
-    .pipe(less({
-      plugins: [cleanCss, autoPrefix],
-    }))
-    .pipe(css2js()),
-  ])
-  .pipe(concat('player.js'))
-  .pipe(wrap('!function(){\n<%=contents%>\n}();'))
-  .pipe(header(banner, {pkg: pkg}))
-  .pipe(gulp.dest('dist'))
-  .pipe(uglify())
-  .pipe(rename({suffix: '.min'}))
-  .pipe(gulp.dest('dist'))
-));
+const DIST = 'dist';
+const IS_PROD = process.env.NODE_ENV === 'production';
+const values = {
+  'process.env.VERSION': pkg.version,
+  'process.env.NODE_ENV': process.env.NODE_ENV || 'development',
+};
 
-gulp.task('default', ['build']);
+
+const rollupOptions = {
+  plugins: [
+    require('rollup-plugin-babel')({
+      runtimeHelpers: true,
+      exclude: 'node_modules/**',
+    }),
+    require('rollup-plugin-replace')({ values }),
+  ],
+};
+
+function buildJs() {
+  return rollup.rollup(Object.assign({
+    input: 'src/index.js',
+  }, rollupOptions))
+  .then(bundle => bundle.write({
+    name: 'H5Player',
+    file: `${DIST}/index.js`,
+    format: 'umd',
+  }))
+  .catch(err => {
+    log(err.toString());
+  });
+}
+
+function buildCss() {
+  return gulp.src('src/style.less')
+  .pipe(less())
+  .pipe(autoprefixer())
+  .pipe(gulp.dest(DIST));
+}
+
+function lint() {
+  return gulp.src('src/**/*.js')
+  .pipe(eslint())
+  .pipe(eslint.format())
+  .pipe(eslint.failAfterError());
+}
+
+function watch() {
+  gulp.watch('src/**/*.js', buildJs);
+  gulp.watch('src/**/*.less', buildCss);
+}
+
+const build = gulp.parallel(buildJs, buildCss);
+
+exports.lint = lint;
+exports.build = build;
+exports.dev = gulp.series(build, watch);

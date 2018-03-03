@@ -1,4 +1,5 @@
-demos
+demo
 snapshots
 src
 gulpfile.js
+yarn.lock
